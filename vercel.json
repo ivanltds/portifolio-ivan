@@ -1,25 +1,16 @@
 {
   "version": 2,
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "x-content-type-options",
-          "value": "nosniff"
-        }
-      ]
-    }
-  ],
   "rewrites": [
     {
       "source": "/api/:path*",
       "destination": "/api/:path*"
     },
     {
-      "source": "/((?!api|assets|.*\\..*).*)",
+      "source": "/(.*\\.(?:jpg|jpeg|gif|png|svg|ico|webp|js|css|woff2))$",
+      "destination": "/$1"
+    },
+    {
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
