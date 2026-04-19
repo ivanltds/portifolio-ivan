@@ -4,6 +4,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import contactHandler from "./api/contact";
+import imagesHandler from "./api/images";
 
 dotenv.config();
 
@@ -20,6 +21,10 @@ async function startServer() {
   app.post("/api/contact", (req, res) => {
     // Adapter for Express
     contactHandler(req, res);
+  });
+
+  app.get("/api/images", (req, res) => {
+    imagesHandler(req, res);
   });
 
   // Vite middleware setup
