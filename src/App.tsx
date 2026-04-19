@@ -355,7 +355,7 @@ export default function App() {
                 desc: "Ferramenta de análise de dados e dashboards de métricas de eficiência (Azure DevOps). Extrai dados e gera insights relevantes via IA.",
                 link: "https://agile-all-view-ai-plkv.vercel.app/",
                 tags: ["AI Metrics", "Azure DevOps", "Data Viz", "Agile"],
-                image: "/portfolio-metrics.jpg"
+                image: "/portfolio-metrics.jpg" // Renamed locally to match the file exactly
               }
             ].map((project, idx) => (
               <motion.div 
@@ -371,6 +371,8 @@ export default function App() {
                     src={project.image} 
                     alt={project.title} 
                     className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-700" 
+                    loading="lazy"
+                    decoding="async"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = `https://picsum.photos/seed/${project.title}/800/450`;
                     }}

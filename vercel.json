@@ -6,7 +6,10 @@
       "destination": "/api/:path*"
     },
     {
-      "source": "/((?!api|assets|.*\\..*).*)",
+      "handle": "filesystem"
+    },
+    {
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
