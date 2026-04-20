@@ -45,28 +45,25 @@ export default function App() {
     const nameWithoutExt = name.split('.')[0].toLowerCase().trim();
     const nameWithExt = name.toLowerCase().trim();
     
-    // 1. Try finding in the dynamic list (if API works)
+    // 1. Try finding in the dynamic list (Smart Matching)
     const dynamicImage = cldImages.find(img => {
+      const cleanName = (img.clean_name || "").toLowerCase();
+      const fullName = (img.full_name || "").toLowerCase();
       const pubId = (img.public_id || "").toLowerCase();
-      return pubId.endsWith(`/${nameWithoutExt}`) || pubId === nameWithoutExt;
+      
+      return cleanName === nameWithoutExt || 
+             fullName.startsWith(nameWithoutExt) ||
+             pubId.endsWith(`/${nameWithoutExt}`);
     });
 
     if (dynamicImage) return dynamicImage.url;
     
-    // 2. Fallback construction
+    // 2. Fallback construction (Root + Folder + Suffix-less)
     const cloud = CLOUD_NAME || "dqt35bpzt";
-    const path = FOLDER || "portfolio/ivan";
     const extension = nameWithExt.endsWith('.png') ? 'png' : 'jpg';
     
-    // Purest possible Cloudinary URL
-    const finalUrl = `https://res.cloudinary.com/${cloud}/image/upload/${path}/${nameWithoutExt}.${extension}`;
-    
-    // LOGGING: This will help the user see exactly what is being requested
-    if (nameWithoutExt.includes('hero') || nameWithoutExt.includes('coyotes')) {
-      console.log(`[Cloudinary] Loading ${name} from: ${finalUrl}`);
-    }
-    
-    return finalUrl;
+    // As a last-ditch effort if API is 401, we try the root path as seen in your example
+    return `https://res.cloudinary.com/${cloud}/image/upload/${nameWithoutExt}.${extension}`;
   };
 
   const fetchCldImages = async () => {

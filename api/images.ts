@@ -18,21 +18,27 @@ export default async function handler(req: any, res: any) {
   });
 
   try {
-    // Fetch all resources in the specific folder
+    // Fetch all resources from the cloud name to handle suffixes and folders dynamically
     const result = await cloudinary.api.resources({
       type: 'upload',
-      prefix: folder,
-      max_results: 100
+      max_results: 500 // Increased to catch everything
     });
 
-    // Map to a simpler structure
-    const images = result.resources.map((resource: any) => ({
-      public_id: resource.public_id,
-      url: resource.secure_url,
-      format: resource.format,
-      created_at: resource.created_at,
-      filename: resource.public_id.split('/').pop() // Get just the file name
-    }));
+    // Map to a simpler structure, being smarter about file names
+    const images = result.resources.map((resource: any) => {
+      const publicId = resource.public_id;
+      const fullFilename = publicId.split('/').pop() || "";
+      // Strip potential Cloudinary suffixes like _o7v0v9
+      const cleanFilename = fullFilename.replace(/_[a-z0-9]{6}$/i, "");
+      
+      return {
+        public_id: publicId,
+        url: resource.secure_url,
+        format: resource.format,
+        clean_name: cleanFilename.toLowerCase(),
+        full_name: fullFilename.toLowerCase()
+      };
+    });
 
     return res.status(200).json({ images });
   } catch (error: any) {
