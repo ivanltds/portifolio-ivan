@@ -45,19 +45,28 @@ export default function App() {
     const nameWithoutExt = name.split('.')[0].toLowerCase().trim();
     const nameWithExt = name.toLowerCase().trim();
     
-    // Try to find the image in the dynamic list first
+    // 1. Try finding in the dynamic list (if API works)
     const dynamicImage = cldImages.find(img => {
-      const imgPublicId = (img.public_id || "").toLowerCase();
-      // Match if the public_id ends with our name (without extension)
-      return imgPublicId.endsWith(`/${nameWithoutExt}`) || imgPublicId === nameWithoutExt;
+      const pubId = (img.public_id || "").toLowerCase();
+      return pubId.endsWith(`/${nameWithoutExt}`) || pubId === nameWithoutExt;
     });
 
     if (dynamicImage) return dynamicImage.url;
     
-    // Fallback if dynamic fetch is not ready yet or fails
-    const ext = nameWithExt.endsWith('.png') ? 'png' : 'jpg';
-    // Standard direct URL with referrer fix
-    return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${FOLDER}/${nameWithoutExt}.${ext}`;
+    // 2. Fallback construction
+    const cloud = CLOUD_NAME || "dqt35bpzt";
+    const path = FOLDER || "portfolio/ivan";
+    const extension = nameWithExt.endsWith('.png') ? 'png' : 'jpg';
+    
+    // Purest possible Cloudinary URL
+    const finalUrl = `https://res.cloudinary.com/${cloud}/image/upload/${path}/${nameWithoutExt}.${extension}`;
+    
+    // LOGGING: This will help the user see exactly what is being requested
+    if (nameWithoutExt.includes('hero') || nameWithoutExt.includes('coyotes')) {
+      console.log(`[Cloudinary] Loading ${name} from: ${finalUrl}`);
+    }
+    
+    return finalUrl;
   };
 
   const fetchCldImages = async () => {
