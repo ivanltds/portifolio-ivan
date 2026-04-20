@@ -33,20 +33,31 @@ import {
 import { useState, useEffect } from "react";
 
 // Cloudinary Configuration
-const CLOUD_NAME = (typeof process !== "undefined" && process.env.VITE_CLOUDINARY_CLOUD_NAME) || "dqt35bpzt";
-const FOLDER = (typeof process !== "undefined" && process.env.VITE_CLOUDINARY_FOLDER) || "portfolio/ivan";
-const BASE_URL = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${FOLDER}`;
+const CLOUD_NAME = ((typeof process !== "undefined" && process.env.VITE_CLOUDINARY_CLOUD_NAME) || "dqt35bpzt").trim();
+const FOLDER = ((typeof process !== "undefined" && process.env.VITE_CLOUDINARY_FOLDER) || "portfolio/ivan").trim().replace(/^\//, "").replace(/\/$/, "");
+
 export default function App() {
   const [childAge, setChildAge] = useState("");
   const [cldImages, setCldImages] = useState<any[]>([]);
   
   const getCldUrl = (name: string) => {
-    // Try to find the image in the dynamic list first (by filename)
-    const dynamicImage = cldImages.find(img => img.filename === name || img.public_id === name || img.public_id.endsWith(name));
+    if (!name) return "";
+    const nameWithoutExt = name.split('.')[0].toLowerCase().trim();
+    const nameWithExt = name.toLowerCase().trim();
+    
+    // Try to find the image in the dynamic list first
+    const dynamicImage = cldImages.find(img => {
+      const imgPublicId = (img.public_id || "").toLowerCase();
+      // Match if the public_id ends with our name (without extension)
+      return imgPublicId.endsWith(`/${nameWithoutExt}`) || imgPublicId === nameWithoutExt;
+    });
+
     if (dynamicImage) return dynamicImage.url;
     
-    // Fallback to static construction
-    return `${BASE_URL}/${name}`;
+    // Fallback if dynamic fetch is not ready yet or fails
+    const ext = nameWithExt.endsWith('.png') ? 'png' : 'jpg';
+    // Standard direct URL with referrer fix
+    return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${FOLDER}/${nameWithoutExt}.${ext}`;
   };
 
   const fetchCldImages = async () => {
@@ -54,7 +65,10 @@ export default function App() {
       const response = await fetch('/api/images');
       if (response.ok) {
         const data = await response.json();
+        console.log("Cloudinary images found:", data.images);
         if (data.images) setCldImages(data.images);
+      } else {
+        console.error("Cloudinary API error status:", response.status);
       }
     } catch (error) {
       console.warn('Cloudinary dynamic fetch failed, using fallback paths.', error);
@@ -169,10 +183,11 @@ export default function App() {
 
           <aside className="hidden lg:flex flex-col justify-center relative">
             <div className="absolute -inset-10 bg-accent/20 blur-[100px] rounded-full opacity-30"></div>
-            <div className="relative aspect-[4/5] overflow-hidden border border-border grayscale hover:grayscale-0 transition-all duration-700 group">
+            <div className="relative aspect-[4/5] overflow-hidden border border-border transition-all duration-700 group">
               <img 
                 src={getCldUrl("ivan-hero.jpg")} 
                 alt="Ivan Souza" 
+                referrerPolicy="no-referrer"
                 className="object-cover w-full h-full scale-110 group-hover:scale-100 transition-transform duration-700"
               />
               <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-background to-transparent">
@@ -219,8 +234,8 @@ export default function App() {
 
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Main Photo - Spans 2 rows on mobile, 2 rows on desktop */}
-                <div className="col-span-2 row-span-2 border border-border overflow-hidden grayscale hover:grayscale-0 transition-all duration-700 min-h-[400px]">
-                  <img src={getCldUrl("sobre-tech.jpg")} alt="Technology" className="w-full h-full object-cover" />
+                <div className="col-span-2 row-span-2 border border-border overflow-hidden transition-all duration-700 min-h-[400px]">
+                  <img src={getCldUrl("sobre-tech.png")} alt="Technology" referrerPolicy="no-referrer" className="w-full h-full object-cover" />
                 </div>
                 
                 {/* Right Column Cards */}
@@ -234,7 +249,7 @@ export default function App() {
                     <Trophy className="text-accent mb-2 group-hover:scale-110 transition-transform" size={20} />
                     <span className="text-[10px] leading-tight uppercase tracking-widest font-black">Diretor Social & Atleta</span>
                     <span className="text-[9px] text-muted uppercase font-bold mt-1">Coyotes Basketball</span>
-                    <img src={getCldUrl("portfolio-coyotes.jpg")} alt="Coyotes" className="absolute -right-4 -bottom-4 w-20 opacity-5 group-hover:opacity-10 transition-opacity rotate-12" />
+                    <img src={getCldUrl("portfolio-coyotes.png")} alt="Coyotes" referrerPolicy="no-referrer" className="absolute -right-4 -bottom-4 w-20 opacity-5 group-hover:opacity-10 transition-opacity rotate-12" />
                   </div>
 
                   <div className="h-40 border border-border bg-surface p-8 flex flex-col justify-center group">
@@ -294,16 +309,17 @@ export default function App() {
                 {/* Badges Grid */}
                 <div className="lg:col-span-2 flex sm:grid sm:grid-cols-2 gap-4 overflow-x-auto no-scrollbar snap-x px-4 sm:px-0 -mx-4 sm:mx-0">
                   {[
-                    { name: "PSM I", issuer: "Scrum.org", image: getCldUrl("badge-psm.jpg") },
-                    { name: "PSPO I", issuer: "Scrum.org", image: getCldUrl("badge-pspo.jpg") },
-                    { name: "OKR Foundation", issuer: "CertiProf", image: getCldUrl("badge-okr.jpg") },
-                    { name: "Análise e Desenvolvimento de Sistemas", issuer: "Mackenzie", image: getCldUrl("badge-mackenzie.jpg") }
+                    { name: "PSM I", issuer: "Scrum.org", image: getCldUrl("badge-psm.png") },
+                    { name: "PSPO I", issuer: "Scrum.org", image: getCldUrl("badge-pspo.png") },
+                    { name: "OKR Foundation", issuer: "CertiProf", image: getCldUrl("badge-okr.png") },
+                    { name: "Análise e Desenvolvimento de Sistemas", issuer: "Mackenzie", image: getCldUrl("badge-mackenzie.png") }
                   ].map((cert, i) => (
                     <div key={i} className="flex gap-4 p-6 border border-border bg-background transition-all hover:border-accent group items-center shrink-0 w-[280px] sm:w-auto snap-center">
                       <div className="w-16 h-16 shrink-0 overflow-hidden bg-white p-1 border border-border/50 transition-transform duration-500 group-hover:scale-105">
                         <img 
                           src={cert.image} 
                           alt={cert.name} 
+                          referrerPolicy="no-referrer"
                           className="w-full h-full object-contain"
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = `https://picsum.photos/seed/${cert.name}/150/150`;
@@ -369,21 +385,21 @@ export default function App() {
                 desc: "Landing page estratégica para time de basquete. Gestão de inscrições em eventos, treinos e captação de novos atletas.",
                 link: "https://basquete-coyotes.vercel.app/",
                 tags: ["React", "Vite", "Tailwind", "Gestão de Eventos"],
-                image: getCldUrl("portfolio-coyotes.jpg")
+                image: getCldUrl("portfolio-coyotes.png")
               },
               {
                 title: "Invite Event (SaaS)",
                 desc: "Plataforma SaaS para gestão de casamentos e eventos sociais, com convites personalizados e controle de convidados.",
                 link: "https://invite-event-beryl.vercel.app/",
                 tags: ["SaaS", "Next.js", "Arquitetura", "UX Design"],
-                image: getCldUrl("portfolio-invite.jpg")
+                image: getCldUrl("portfolio-invite.png")
               },
               {
                 title: "Agile All View AI",
                 desc: "Ferramenta de análise de dados e dashboards de métricas de eficiência (Azure DevOps). Extrai dados e gera insights relevantes via IA.",
                 link: "https://agile-all-view-ai-plkv.vercel.app/",
                 tags: ["AI Metrics", "Azure DevOps", "Data Viz", "Agile"],
-                image: getCldUrl("portfolio-metrics.jpg")
+                image: getCldUrl("portfolio-metrics.png")
               }
             ].map((project, idx) => (
               <motion.div 
@@ -394,14 +410,16 @@ export default function App() {
                 transition={{ delay: idx * 0.2 }}
                 className="group relative"
               >
-                <div className="relative aspect-video overflow-hidden border border-border grayscale hover:grayscale-0 transition-all duration-700">
+                <div className="relative aspect-video overflow-hidden border border-border transition-all duration-700">
                   <img 
                     src={project.image} 
                     alt={project.title} 
+                    referrerPolicy="no-referrer"
                     className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-700" 
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
+                      console.log(`Failed to load: ${project.image}`);
                       (e.target as HTMLImageElement).src = `https://picsum.photos/seed/${project.title}/800/450`;
                     }}
                   />
