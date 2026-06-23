@@ -30,41 +30,52 @@ function getImages(p: Project): ProjectImage[] {
   return normalizeImages(imgs as (string | ProjectImage)[]);
 }
 
-// ─── Phone frame minimalista ─────────────────────────────────────────────────
+// ─── Phone frame minimalista (estilo referência) ─────────────────────────────
 function PhoneFrame({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "20px 0 24px" }}>
-      <div style={{ position: "relative", width: "210px" }}>
-        {/* Corpo: borda fina, sombra sutil */}
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "18px 0 22px" }}>
+      <div style={{
+        width: "214px",
+        background: "#141414",
+        borderRadius: "46px",
+        padding: "0",
+        boxShadow: [
+          "0 0 0 1.5px #333",           // borda principal
+          "0 0 0 3px #0d0d0d",          // margem interna
+          "0 24px 64px rgba(0,0,0,0.6)",// sombra
+          "inset 0 1px 0 rgba(255,255,255,0.07)", // brilho topo
+        ].join(", "),
+      }}>
+        {/* Área superior — Dynamic Island */}
         <div style={{
-          border: "6px solid #2a2a2a",
-          borderRadius: "38px",
-          overflow: "hidden",
-          background: "#000",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06)",
+          display: "flex", justifyContent: "center", alignItems: "center",
+          height: "44px", background: "#141414",
+          borderRadius: "46px 46px 0 0",
         }}>
-          {/* Dynamic Island */}
           <div style={{
-            display: "flex", justifyContent: "center",
-            paddingTop: "10px", paddingBottom: "6px",
+            width: "78px", height: "26px",
             background: "#000",
-          }}>
-            <div style={{
-              width: "68px", height: "22px",
-              background: "#111",
-              borderRadius: "14px",
-            }} />
-          </div>
-          {/* Tela */}
-          <div style={{ lineHeight: 0 }}>{children}</div>
-          {/* Home bar */}
+            borderRadius: "16px",
+            boxShadow: "inset 0 0 0 0.5px rgba(255,255,255,0.08)",
+          }} />
+        </div>
+
+        {/* Tela */}
+        <div style={{ lineHeight: 0, overflow: "hidden" }}>
+          {children}
+        </div>
+
+        {/* Área inferior — home bar */}
+        <div style={{
+          display: "flex", justifyContent: "center", alignItems: "center",
+          height: "32px", background: "#141414",
+          borderRadius: "0 0 46px 46px",
+        }}>
           <div style={{
-            display: "flex", justifyContent: "center",
-            padding: "10px 0 8px",
-            background: "#000",
-          }}>
-            <div style={{ width: "50px", height: "3px", background: "rgba(255,255,255,0.18)", borderRadius: "3px" }} />
-          </div>
+            width: "54px", height: "4px",
+            background: "rgba(255,255,255,0.15)",
+            borderRadius: "4px",
+          }} />
         </div>
       </div>
     </div>
