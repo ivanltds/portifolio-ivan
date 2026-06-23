@@ -5,6 +5,9 @@ import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import contactHandler from "./api/contact";
 import imagesHandler from "./api/images";
+import projectsHandler from "./api/projects";
+import loginHandler from "./api/admin/login";
+import adminProjectsHandler from "./api/admin/projects";
 
 dotenv.config();
 
@@ -17,17 +20,19 @@ async function startServer() {
 
   app.use(express.json());
 
-  // API Routes
-  app.post("/api/contact", (req, res) => {
-    // Adapter for Express
-    contactHandler(req, res);
-  });
+  // Public API
+  app.post("/api/contact", contactHandler);
+  app.get("/api/images", imagesHandler);
+  app.get("/api/projects", projectsHandler);
 
-  app.get("/api/images", (req, res) => {
-    imagesHandler(req, res);
-  });
+  // Admin API
+  app.post("/api/admin/login", loginHandler);
+  app.get("/api/admin/projects", adminProjectsHandler);
+  app.post("/api/admin/projects", adminProjectsHandler);
+  app.put("/api/admin/projects/:id", adminProjectsHandler);
+  app.delete("/api/admin/projects/:id", adminProjectsHandler);
 
-  // Vite middleware setup
+  // Vite middleware
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },

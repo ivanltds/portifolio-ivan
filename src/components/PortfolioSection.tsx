@@ -1,34 +1,56 @@
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { ExternalLink } from "lucide-react";
+
+interface Project {
+  id: string;
+  title: string;
+  desc: string;
+  link: string;
+  tags: string[];
+  image: string;
+}
+
+const FALLBACK_PROJECTS: Project[] = [
+  {
+    id: "1",
+    title: "Coyotes Basquete",
+    desc: "Landing page estratégica para time de basquete. Gestão de inscrições em eventos, treinos e captação de novos atletas.",
+    link: "https://basquete-coyotes.vercel.app/",
+    tags: ["React", "Vite", "Tailwind", "Gestão de Eventos"],
+    image: "portfolio-coyotes.png",
+  },
+  {
+    id: "2",
+    title: "Invite Event (SaaS)",
+    desc: "Plataforma SaaS para gestão de casamentos e eventos sociais, com convites personalizados e controle de convidados.",
+    link: "https://invite-event-beryl.vercel.app/",
+    tags: ["SaaS", "Next.js", "Arquitetura", "UX Design"],
+    image: "portfolio-invite.png",
+  },
+  {
+    id: "3",
+    title: "Agile All View AI",
+    desc: "Ferramenta de análise de dados e dashboards de métricas de eficiência (Azure DevOps). Extrai dados e gera insights relevantes via IA.",
+    link: "https://agile-all-view-ai-plkv.vercel.app/",
+    tags: ["AI Metrics", "Azure DevOps", "Data Viz", "Agile"],
+    image: "portfolio-metrics.png",
+  },
+];
 
 interface Props {
   getCldUrl: (name: string) => string;
 }
 
 export default function PortfolioSection({ getCldUrl }: Props) {
-  const projects = [
-    {
-      title: "Coyotes Basquete",
-      desc: "Landing page estratégica para time de basquete. Gestão de inscrições em eventos, treinos e captação de novos atletas.",
-      link: "https://basquete-coyotes.vercel.app/",
-      tags: ["React", "Vite", "Tailwind", "Gestão de Eventos"],
-      image: getCldUrl("portfolio-coyotes.png"),
-    },
-    {
-      title: "Invite Event (SaaS)",
-      desc: "Plataforma SaaS para gestão de casamentos e eventos sociais, com convites personalizados e controle de convidados.",
-      link: "https://invite-event-beryl.vercel.app/",
-      tags: ["SaaS", "Next.js", "Arquitetura", "UX Design"],
-      image: getCldUrl("portfolio-invite.png"),
-    },
-    {
-      title: "Agile All View AI",
-      desc: "Ferramenta de análise de dados e dashboards de métricas de eficiência (Azure DevOps). Extrai dados e gera insights relevantes via IA.",
-      link: "https://agile-all-view-ai-plkv.vercel.app/",
-      tags: ["AI Metrics", "Azure DevOps", "Data Viz", "Agile"],
-      image: getCldUrl("portfolio-metrics.png"),
-    },
-  ];
+  const [projects, setProjects] = useState<Project[]>(FALLBACK_PROJECTS);
+
+  useEffect(() => {
+    fetch("/api/projects")
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => { if (data?.projects?.length) setProjects(data.projects); })
+      .catch(() => {});
+  }, []);
 
   return (
     <section id="portfolio" className="px-6 lg:px-16 py-20 lg:py-32 border-b border-border bg-background">
@@ -45,7 +67,7 @@ export default function PortfolioSection({ getCldUrl }: Props) {
       <div className="grid md:grid-cols-2 gap-12">
         {projects.map((project, idx) => (
           <motion.div
-            key={idx}
+            key={project.id}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -54,7 +76,7 @@ export default function PortfolioSection({ getCldUrl }: Props) {
           >
             <div className="relative aspect-video overflow-hidden border border-border transition-all duration-700">
               <img
-                src={project.image}
+                src={getCldUrl(project.image)}
                 alt={project.title}
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-700"

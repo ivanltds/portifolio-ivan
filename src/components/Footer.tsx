@@ -1,4 +1,4 @@
-import { Linkedin, Mail, MessageCircle } from "lucide-react";
+import { Linkedin, Mail, MessageCircle, Settings } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -43,9 +43,19 @@ export default function Footer() {
           </div>
         </div>
       </footer>
+
       <div className="px-6 lg:px-16 py-8 border-t border-border bg-background flex flex-col sm:flex-row justify-between items-center gap-4 text-[9px] text-muted font-bold uppercase tracking-[2px]">
         <span>© 2026 Ivan Souza.</span>
         <span className="opacity-50 tracking-[4px]">Desenvolvedor & Agile Master.</span>
+        {/* Ícone discreto de acesso ao admin */}
+        <a
+          href="/admin"
+          className="opacity-20 hover:opacity-60 transition-opacity text-muted"
+          title="Admin"
+          aria-label="Painel administrativo"
+        >
+          <Settings size={13} />
+        </a>
       </div>
     </>
   );
