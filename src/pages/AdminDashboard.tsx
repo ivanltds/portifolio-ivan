@@ -64,20 +64,31 @@ export default function AdminDashboard({ onLogout }: Props) {
 
   const closePanel = () => { setEditing(null); setIsNew(false); setError(""); };
 
-  // Comprime imagem para no máximo 1200px e qualidade 0.8 antes de enviar
+  // Redimensiona para no máximo 1400px mantendo o formato original
+  // PNG → mantém transparência; JPEG/outros → comprime com qualidade 0.85
   const compressImage = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
       const img = new Image();
       const url = URL.createObjectURL(file);
       img.onload = () => {
-        const MAX = 1200;
+        const MAX = 1400;
         const scale = Math.min(1, MAX / Math.max(img.width, img.height));
         const canvas = document.createElement("canvas");
         canvas.width = Math.round(img.width * scale);
         canvas.height = Math.round(img.height * scale);
-        canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const ctx = canvas.getContext("2d")!;
+        // PNG: preserva canal alpha — não preenche fundo
+        // JPEG: preenche fundo branco para evitar artefatos
+        const isPng = file.type === "image/png";
+        if (!isPng) {
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         URL.revokeObjectURL(url);
-        resolve(canvas.toDataURL("image/jpeg", 0.82));
+        resolve(isPng
+          ? canvas.toDataURL("image/png")
+          : canvas.toDataURL("image/jpeg", 0.85));
       };
       img.onerror = reject;
       img.src = url;
