@@ -8,6 +8,7 @@ import imagesHandler from "./api/images";
 import projectsHandler from "./api/projects";
 import loginHandler from "./api/admin/login";
 import adminProjectsHandler from "./api/admin/projects";
+import uploadHandler from "./api/admin/upload";
 
 dotenv.config();
 
@@ -18,7 +19,7 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json());
+  app.use(express.json({ limit: "10mb" }));
 
   // Public API
   app.post("/api/contact", contactHandler);
@@ -31,6 +32,7 @@ async function startServer() {
   app.post("/api/admin/projects", adminProjectsHandler);
   app.put("/api/admin/projects/:id", adminProjectsHandler);
   app.delete("/api/admin/projects/:id", adminProjectsHandler);
+  app.post("/api/admin/upload", uploadHandler);
 
   // Vite middleware
   if (process.env.NODE_ENV !== "production") {

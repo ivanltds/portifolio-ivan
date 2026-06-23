@@ -15,14 +15,6 @@
       "link": "https://invite-event-beryl.vercel.app/",
       "tags": ["SaaS", "Next.js", "Arquitetura", "UX Design"],
       "image": "portfolio-invite.png"
-    },
-    {
-      "id": "3",
-      "title": "Agile All View AI",
-      "desc": "Ferramenta de análise de dados e dashboards de métricas de eficiência (Azure DevOps). Extrai dados e gera insights relevantes via IA.",
-      "link": "https://agile-all-view-ai-plkv.vercel.app/",
-      "tags": ["AI Metrics", "Azure DevOps", "Data Viz", "Agile"],
-      "image": "portfolio-metrics.png"
     }
   ]
 }
