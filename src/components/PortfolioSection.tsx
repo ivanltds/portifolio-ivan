@@ -62,22 +62,19 @@ function Carousel({ images, title }: { images: string[]; title: string }) {
   }
 
   return (
-    <div className="relative overflow-hidden border border-border group bg-[#0a0a0a]" style={{ minHeight: "200px", maxHeight: "520px" }}>
+    <div className="relative overflow-hidden border border-border group-hover:border-accent/50 group bg-[#0a0a0a] transition-colors duration-300" style={{ minHeight: "200px", maxHeight: "520px" }}>
       {/* Slides */}
       {images.map((url, i) => (
         <img
           key={i}
           src={url}
           alt={`${title} — ${i + 1}`}
-          className={`block w-full h-auto max-h-[520px] object-contain transition-all duration-700
+          className={`block w-full h-auto max-h-[520px] object-contain transition-opacity duration-700
             ${i === current ? "opacity-100" : "opacity-0 absolute inset-0"}`}
           loading="lazy"
           decoding="async"
         />
       ))}
-
-      {/* Overlay hover */}
-      <div className="absolute inset-0 bg-accent/20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
       {/* Setas — só com múltiplas imagens */}
       {images.length > 1 && (
