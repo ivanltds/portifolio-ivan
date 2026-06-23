@@ -15,7 +15,7 @@ export default function Navbar() {
         onClick={() => scrollToSection("diagnostico")}
         className="hidden sm:flex text-xs font-bold uppercase tracking-widest border border-accent bg-accent/5 hover:bg-accent hover:text-white px-6 py-2 transition-all"
       >
-        Agendar Diagnóstico
+        Conversa de 20 min
       </button>
     </header>
   );
