@@ -62,7 +62,7 @@ function Carousel({ images, title }: { images: string[]; title: string }) {
   }
 
   return (
-    <div className="relative overflow-hidden border border-border group-hover:border-accent/50 group bg-[#0a0a0a] transition-colors duration-300" style={{ minHeight: "200px", maxHeight: "520px" }}>
+    <div className="relative overflow-hidden border border-border group-hover:border-accent/50 group bg-background transition-colors duration-300" style={{ minHeight: "200px", maxHeight: "520px" }}>
       {/* Slides */}
       {images.map((url, i) => (
         <img
