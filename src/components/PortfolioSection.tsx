@@ -30,33 +30,28 @@ function getImages(p: Project): ProjectImage[] {
   return normalizeImages(imgs as (string | ProjectImage)[]);
 }
 
-// ─── Phone frame minimalista (estilo referência) ─────────────────────────────
+// ─── Phone frame minimalista (estilo pré-visualização) ───────────────────────
 function PhoneFrame({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "18px 0 22px" }}>
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "12px 0 14px" }}>
       <div style={{
-        width: "214px",
-        background: "#141414",
-        borderRadius: "46px",
-        padding: "0",
-        boxShadow: [
-          "0 0 0 1.5px #333",           // borda principal
-          "0 0 0 3px #0d0d0d",          // margem interna
-          "0 24px 64px rgba(0,0,0,0.6)",// sombra
-          "inset 0 1px 0 rgba(255,255,255,0.07)", // brilho topo
-        ].join(", "),
+        width: "220px",
+        background: "#111",
+        borderRadius: "28px",
+        border: "2px solid #222",
+        boxShadow: "0 12px 40px rgba(0,0,0,0.5)",
+        overflow: "hidden",
       }}>
-        {/* Área superior — Dynamic Island */}
+        {/* Câmera */}
         <div style={{
           display: "flex", justifyContent: "center", alignItems: "center",
-          height: "44px", background: "#141414",
-          borderRadius: "46px 46px 0 0",
+          height: "24px", background: "#111",
         }}>
           <div style={{
-            width: "78px", height: "26px",
-            background: "#000",
-            borderRadius: "16px",
-            boxShadow: "inset 0 0 0 0.5px rgba(255,255,255,0.08)",
+            width: "8px", height: "8px",
+            background: "#1a1a1a",
+            borderRadius: "50%",
+            border: "1px solid #2a2a2a",
           }} />
         </div>
 
@@ -65,16 +60,15 @@ function PhoneFrame({ children }: { children: React.ReactNode }) {
           {children}
         </div>
 
-        {/* Área inferior — home bar */}
+        {/* Home bar */}
         <div style={{
           display: "flex", justifyContent: "center", alignItems: "center",
-          height: "32px", background: "#141414",
-          borderRadius: "0 0 46px 46px",
+          height: "20px", background: "#111",
         }}>
           <div style={{
-            width: "54px", height: "4px",
-            background: "rgba(255,255,255,0.15)",
-            borderRadius: "4px",
+            width: "48px", height: "3px",
+            background: "rgba(255,255,255,0.2)",
+            borderRadius: "3px",
           }} />
         </div>
       </div>
