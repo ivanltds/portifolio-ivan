@@ -30,7 +30,7 @@ export default async function handler(req: any, res: any) {
     secure: true,
   });
 
-  const folder = (process.env.VITE_CLOUDINARY_FOLDER || "portfolio/ivan").replace(/\/$/, "");
+  const folder = (process.env.VITE_CLOUDINARY_FOLDER || "portfolio/ivan").trim().replace(/\/$/, "");
 
   try {
     // Deixa o Cloudinary gerar o public_id — evita problemas com caracteres inválidos
