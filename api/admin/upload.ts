@@ -31,14 +31,24 @@ export default async function handler(req: any, res: any) {
   });
 
   const folder = (process.env.VITE_CLOUDINARY_FOLDER || "portfolio/ivan").replace(/\/$/, "");
-  const cleanName = filename
-    ? filename.replace(/\.[^/.]+$/, "").replace(/[^a-z0-9_-]/gi, "-").toLowerCase()
-    : undefined;
+
+  // Sanitiza: remove extensão, troca qualquer caractere não-alfanumérico por hífen,
+  // colapsa hífens múltiplos, remove hífens nas bordas
+  const sanitizeName = (name: string) =>
+    name
+      .replace(/\.[^/.]+$/, "")           // remove extensão
+      .toLowerCase()
+      .normalize("NFD").replace(/[̀-ͯ]/g, "") // remove acentos
+      .replace(/[^a-z0-9]+/g, "-")        // qualquer coisa estranha → hífen
+      .replace(/^-+|-+$/g, "")            // hífens nas bordas
+      .slice(0, 60);                       // Cloudinary limita o tamanho
+
+  const publicId = filename ? sanitizeName(filename) : undefined;
 
   try {
     const result = await cloudinary.uploader.upload(image, {
       folder,
-      ...(cleanName && { public_id: cleanName, overwrite: true }),
+      ...(publicId && { public_id: publicId, overwrite: true }),
       transformation: [{ quality: "auto", fetch_format: "auto" }],
     });
 
