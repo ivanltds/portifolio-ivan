@@ -14,7 +14,8 @@ interface Project {
   desc: string;
   link: string;
   tags: string[];
-  image: string;
+  images: string[];   // array de URLs (novo)
+  image?: string;     // legado — mantido para compatibilidade
 }
 
 // ─── Auth inline ──────────────────────────────────────────────────────────────
@@ -33,10 +34,18 @@ function verifyToken(req: any): boolean {
   return token === expected;
 }
 
+// ─── Normaliza projetos antigos (image → images[]) ────────────────────────────
+function normalize(p: any): Project {
+  if (!p.images || p.images.length === 0) {
+    return { ...p, images: p.image ? [p.image] : [] };
+  }
+  return p;
+}
+
 // ─── KV helpers ───────────────────────────────────────────────────────────────
 async function readProjects(): Promise<Project[]> {
   const data = await redis.get<Project[]>(KV_KEY);
-  return data || [];
+  return (data || []).map(normalize);
 }
 
 async function writeProjects(projects: Project[]): Promise<void> {
@@ -65,7 +74,6 @@ export default async function handler(req: any, res: any) {
   }
 
   // ID vem como query param: /api/admin/projects?id=123
-  // (Vercel serverless não roteia /api/admin/projects/:id automaticamente)
   const idFromQuery = req.query?.id as string | undefined;
   const hasId = !!idFromQuery;
 
@@ -85,14 +93,14 @@ export default async function handler(req: any, res: any) {
         desc: body.desc || "",
         link: body.link || "",
         tags: Array.isArray(body.tags) ? body.tags : [],
-        image: body.image || "",
+        images: Array.isArray(body.images) ? body.images : [],
       };
       projects.push(newProject);
       await writeProjects(projects);
       return res.status(201).json({ project: newProject });
     }
 
-    // PUT /api/admin/projects/:id
+    // PUT /api/admin/projects?id=123
     if (req.method === "PUT" && hasId) {
       const projects = await readProjects();
       const idx = projects.findIndex((p) => p.id === idFromQuery);
@@ -103,13 +111,13 @@ export default async function handler(req: any, res: any) {
         desc: body.desc ?? projects[idx].desc,
         link: body.link ?? projects[idx].link,
         tags: Array.isArray(body.tags) ? body.tags : projects[idx].tags,
-        image: body.image ?? projects[idx].image,
+        images: Array.isArray(body.images) ? body.images : projects[idx].images,
       };
       await writeProjects(projects);
       return res.status(200).json({ project: projects[idx] });
     }
 
-    // DELETE /api/admin/projects/:id
+    // DELETE /api/admin/projects?id=123
     if (req.method === "DELETE" && hasId) {
       const projects = await readProjects();
       const filtered = projects.filter((p) => p.id !== idFromQuery);

@@ -7,17 +7,17 @@ interface Project {
   desc: string;
   link: string;
   tags: string[];
-  image: string; // URL completa ou nome do arquivo
+  images: string[];
+  image?: string; // legado
 }
 
-const EMPTY: Omit<Project, "id"> = { title: "", desc: "", link: "", tags: [], image: "" };
+const EMPTY = { title: "", desc: "", link: "", tags: [] as string[], images: [] as string[] };
 
-// Aceita URL completa ou nome de arquivo do Cloudinary
-function getImageUrl(image: string): string {
-  if (!image) return "";
-  if (image.startsWith("http")) return image;
-  const name = image.split(".")[0];
-  return `https://res.cloudinary.com/dqt35bpzt/image/upload/f_auto,q_auto/portfolio/ivan/${name}`;
+// Normaliza projetos antigos
+function getImages(p: Project): string[] {
+  if (p.images?.length > 0) return p.images;
+  if (p.image) return [p.image];
+  return [];
 }
 
 interface Props { onLogout: () => void; }
@@ -31,7 +31,6 @@ export default function AdminDashboard({ onLogout }: Props) {
   const [tagsInput, setTagsInput] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState("");
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -54,58 +53,57 @@ export default function AdminDashboard({ onLogout }: Props) {
   useEffect(() => { fetchProjects(); }, []);
 
   const openNew = () => {
-    setForm(EMPTY); setTagsInput(""); setPreviewUrl("");
-    setEditing(null); setIsNew(true); setError("");
+    setForm(EMPTY); setTagsInput(""); setEditing(null); setIsNew(true); setError("");
   };
 
   const openEdit = (p: Project) => {
-    setForm({ title: p.title, desc: p.desc, link: p.link, tags: p.tags, image: p.image });
+    setForm({ title: p.title, desc: p.desc, link: p.link, tags: p.tags, images: getImages(p) });
     setTagsInput(p.tags.join(", "));
-    setPreviewUrl(getImageUrl(p.image));
     setEditing(p); setIsNew(false); setError("");
   };
 
-  const closePanel = () => { setEditing(null); setIsNew(false); setError(""); setPreviewUrl(""); };
+  const closePanel = () => { setEditing(null); setIsNew(false); setError(""); };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // Upload de uma imagem → Cloudinary
+  const uploadFile = async (file: File): Promise<string> => {
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+    const res = await fetch("/api/admin/upload", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ image: base64, filename: file.name }),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Falha no upload");
+    }
+    const { url } = await res.json();
+    return url;
+  };
 
-    // Preview local imediato enquanto faz upload
-    setPreviewUrl(URL.createObjectURL(file));
+  const handleFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
     setUploading(true);
     setError("");
-
     try {
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-
-      const res = await fetch("/api/admin/upload", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ image: base64, filename: file.name }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Falha no upload");
-      }
-
-      const { url } = await res.json();
-      // Salva a URL completa do Cloudinary — aparece na lista imediatamente
-      setForm((f) => ({ ...f, image: url }));
-      setPreviewUrl(url);
+      // Upload em paralelo
+      const urls = await Promise.all(files.map(uploadFile));
+      setForm((f) => ({ ...f, images: [...f.images, ...urls] }));
     } catch (err: any) {
       setError("Erro no upload: " + err.message);
-      setPreviewUrl("");
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
     }
+  };
+
+  const removeImage = (idx: number) => {
+    setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== idx) }));
   };
 
   const handleSave = async () => {
@@ -172,23 +170,26 @@ export default function AdminDashboard({ onLogout }: Props) {
         ) : (
           <div className="space-y-3">
             {projects.map((project) => {
-              const imgUrl = getImageUrl(project.image);
+              const imgs = getImages(project);
               return (
                 <div key={project.id} className="flex items-center gap-4 p-5 border border-border bg-background hover:border-accent/40 transition-all group">
-                  {/* Thumbnail */}
-                  <div className="w-20 h-14 shrink-0 border border-border/50 overflow-hidden bg-surface flex items-center justify-center">
-                    {imgUrl ? (
-                      <img
-                        src={imgUrl}
-                        alt={project.title}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = "none";
-                          (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden");
-                        }}
-                      />
-                    ) : null}
-                    <ImageIcon size={16} className={`text-muted/30 ${imgUrl ? "hidden" : ""}`} />
+                  {/* Thumbnails */}
+                  <div className="flex gap-1 shrink-0">
+                    {imgs.slice(0, 3).map((url, i) => (
+                      <div key={i} className="w-16 h-12 border border-border/50 overflow-hidden bg-surface">
+                        <img src={url} alt="" className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                    {imgs.length === 0 && (
+                      <div className="w-16 h-12 border border-border/50 flex items-center justify-center">
+                        <ImageIcon size={14} className="text-muted/30" />
+                      </div>
+                    )}
+                    {imgs.length > 3 && (
+                      <div className="w-16 h-12 border border-border/50 flex items-center justify-center bg-surface">
+                        <span className="text-[10px] text-muted font-bold">+{imgs.length - 3}</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Info */}
@@ -236,41 +237,60 @@ export default function AdminDashboard({ onLogout }: Props) {
             </div>
 
             <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
-              {/* Upload */}
+
+              {/* Grid de imagens */}
               <div className="space-y-3">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-muted">Imagem do Projeto</label>
-                <div
-                  onClick={() => !uploading && fileRef.current?.click()}
-                  className={`relative w-full aspect-video border-2 border-dashed flex items-center justify-center overflow-hidden transition-all
-                    ${uploading ? "border-accent/50 cursor-wait" : "border-border hover:border-accent cursor-pointer"}`}
-                >
-                  {previewUrl ? (
-                    <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="flex flex-col items-center gap-2 text-muted">
-                      <Upload size={24} />
-                      <span className="text-[10px] uppercase tracking-widest">Clique para selecionar</span>
-                      <span className="text-[9px] text-muted/50">JPG, PNG, WebP</span>
-                    </div>
-                  )}
+                <label className="text-[10px] uppercase tracking-widest font-bold text-muted flex items-center gap-2">
+                  Imagens do Projeto
+                  <span className="opacity-50 normal-case tracking-normal font-normal">({form.images.length} foto{form.images.length !== 1 ? "s" : ""})</span>
+                </label>
 
-                  {uploading && (
-                    <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center gap-2">
-                      <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-                      <span className="text-[10px] text-accent uppercase tracking-widest">Enviando para Cloudinary...</span>
+                <div className="grid grid-cols-3 gap-2">
+                  {form.images.map((url, idx) => (
+                    <div key={idx} className="relative aspect-video border border-border overflow-hidden group/img">
+                      <img src={url} alt="" className="w-full h-full object-cover" />
+                      {idx === 0 && (
+                        <span className="absolute top-1 left-1 text-[8px] bg-accent text-white px-1.5 py-0.5 uppercase tracking-widest font-bold">Capa</span>
+                      )}
+                      <button
+                        onClick={() => removeImage(idx)}
+                        className="absolute top-1 right-1 bg-background/80 p-1 opacity-0 group-hover/img:opacity-100 transition-opacity hover:text-red-500"
+                      >
+                        <X size={10} />
+                      </button>
                     </div>
-                  )}
+                  ))}
 
-                  {previewUrl && !uploading && (
-                    <div className="absolute inset-0 bg-background/0 hover:bg-background/50 transition-all flex items-center justify-center opacity-0 hover:opacity-100">
-                      <span className="text-[10px] text-white uppercase tracking-widest bg-accent px-3 py-2 flex items-center gap-2">
-                        <Upload size={12} /> Trocar imagem
-                      </span>
-                    </div>
-                  )}
+                  {/* Botão adicionar */}
+                  <button
+                    onClick={() => !uploading && fileRef.current?.click()}
+                    disabled={uploading}
+                    className={`aspect-video border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-all
+                      ${uploading ? "border-accent/30 cursor-wait" : "border-border hover:border-accent cursor-pointer"}`}
+                  >
+                    {uploading ? (
+                      <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <Plus size={16} className="text-muted" />
+                        <span className="text-[9px] text-muted uppercase tracking-widest">Adicionar</span>
+                      </>
+                    )}
+                  </button>
                 </div>
 
-                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleFilesChange}
+                />
+
+                {form.images.length > 1 && (
+                  <p className="text-[10px] text-muted opacity-60">A primeira imagem é usada como capa no carrossel.</p>
+                )}
               </div>
 
               {/* Título */}

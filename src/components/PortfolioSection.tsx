@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "motion/react";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Project {
   id: string;
@@ -8,7 +8,8 @@ interface Project {
   desc: string;
   link: string;
   tags: string[];
-  image: string;
+  images: string[];
+  image?: string; // legado
 }
 
 const FALLBACK_PROJECTS: Project[] = [
@@ -18,6 +19,7 @@ const FALLBACK_PROJECTS: Project[] = [
     desc: "Landing page estratégica para time de basquete. Gestão de inscrições em eventos, treinos e captação de novos atletas.",
     link: "https://basquete-coyotes.vercel.app/",
     tags: ["React", "Vite", "Tailwind", "Gestão de Eventos"],
+    images: [],
     image: "portfolio-coyotes.png",
   },
   {
@@ -26,18 +28,93 @@ const FALLBACK_PROJECTS: Project[] = [
     desc: "Plataforma SaaS para gestão de casamentos e eventos sociais, com convites personalizados e controle de convidados.",
     link: "https://invite-event-beryl.vercel.app/",
     tags: ["SaaS", "Next.js", "Arquitetura", "UX Design"],
+    images: [],
     image: "portfolio-invite.png",
-  },
-  {
-    id: "3",
-    title: "Agile All View AI",
-    desc: "Ferramenta de análise de dados e dashboards de métricas de eficiência (Azure DevOps). Extrai dados e gera insights relevantes via IA.",
-    link: "https://agile-all-view-ai-plkv.vercel.app/",
-    tags: ["AI Metrics", "Azure DevOps", "Data Viz", "Agile"],
-    image: "portfolio-metrics.png",
   },
 ];
 
+function getImages(p: Project): string[] {
+  if (p.images?.length > 0) return p.images;
+  if (p.image?.startsWith("http")) return [p.image];
+  return [];
+}
+
+// ─── Carrossel por projeto ─────────────────────────────────────────────────────
+function Carousel({ images, title }: { images: string[]; title: string }) {
+  const [current, setCurrent] = useState(0);
+
+  const prev = useCallback(() => setCurrent((c) => (c - 1 + images.length) % images.length), [images.length]);
+  const next = useCallback(() => setCurrent((c) => (c + 1) % images.length), [images.length]);
+
+  // Auto-play a cada 4s
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const id = setInterval(next, 4000);
+    return () => clearInterval(id);
+  }, [next, images.length]);
+
+  if (images.length === 0) {
+    return (
+      <div className="aspect-video bg-surface border border-border flex items-center justify-center">
+        <span className="text-xs text-muted/30 uppercase tracking-widest">Sem imagem</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative aspect-video overflow-hidden border border-border group">
+      {/* Slides */}
+      {images.map((url, i) => (
+        <img
+          key={i}
+          src={url}
+          alt={`${title} — ${i + 1}`}
+          className={`absolute inset-0 w-full h-full object-cover transition-all duration-700
+            ${i === current ? "opacity-100 scale-100" : "opacity-0 scale-110"}`}
+          loading="lazy"
+          decoding="async"
+        />
+      ))}
+
+      {/* Overlay hover */}
+      <div className="absolute inset-0 bg-accent/20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+      {/* Setas — só com múltiplas imagens */}
+      {images.length > 1 && (
+        <>
+          <button
+            onClick={(e) => { e.stopPropagation(); prev(); }}
+            className="absolute left-3 top-1/2 -translate-y-1/2 bg-background/70 hover:bg-background p-2 opacity-0 group-hover:opacity-100 transition-all"
+            aria-label="Anterior"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); next(); }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 bg-background/70 hover:bg-background p-2 opacity-0 group-hover:opacity-100 transition-all"
+            aria-label="Próximo"
+          >
+            <ChevronRight size={16} />
+          </button>
+
+          {/* Pontos indicadores */}
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                onClick={(e) => { e.stopPropagation(); setCurrent(i); }}
+                className={`w-1.5 h-1.5 rounded-full transition-all ${i === current ? "bg-white w-4" : "bg-white/40"}`}
+                aria-label={`Foto ${i + 1}`}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─── Section ──────────────────────────────────────────────────────────────────
 interface Props {
   getCldUrl: (name: string) => string;
 }
@@ -65,47 +142,47 @@ export default function PortfolioSection({ getCldUrl }: Props) {
       </div>
 
       <div className="grid md:grid-cols-2 gap-12">
-        {projects.map((project, idx) => (
-          <motion.div
-            key={project.id}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: idx * 0.2 }}
-            className="group relative"
-          >
-            <div className="relative aspect-video overflow-hidden border border-border transition-all duration-700">
-              <img
-                src={project.image?.startsWith("http") ? project.image : getCldUrl(project.image)}
-                alt={project.title}
-                referrerPolicy="no-referrer"
-                className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-700"
-                loading="lazy"
-                decoding="async"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = `https://picsum.photos/seed/${project.title}/800/450`;
-                }}
-              />
-              <div className="absolute inset-0 bg-accent/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            </div>
-            <div className="pt-8 space-y-4">
-              <div className="flex justify-between items-start">
-                <h3 className="text-2xl font-bold tracking-tight uppercase">{project.title}</h3>
-                <a href={project.link} target="_blank" rel="noreferrer" className="p-3 border border-border hover:bg-accent hover:text-white transition-all">
-                  <ExternalLink size={18} />
-                </a>
+        {projects.map((project, idx) => {
+          const images = getImages(project);
+          // Fallback legado: nome de arquivo → getCldUrl
+          const resolvedImages = images.length > 0
+            ? images
+            : project.image && !project.image.startsWith("http")
+              ? [getCldUrl(project.image)]
+              : [];
+
+          return (
+            <motion.div
+              key={project.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: idx * 0.15 }}
+              className="group relative"
+            >
+              <Carousel images={resolvedImages} title={project.title} />
+
+              <div className="pt-8 space-y-4">
+                <div className="flex justify-between items-start">
+                  <h3 className="text-2xl font-bold tracking-tight uppercase">{project.title}</h3>
+                  <a href={project.link} target="_blank" rel="noreferrer"
+                    className="p-3 border border-border hover:bg-accent hover:text-white transition-all">
+                    <ExternalLink size={18} />
+                  </a>
+                </div>
+                <p className="text-sm text-muted leading-relaxed font-light">{project.desc}</p>
+                <div className="flex flex-nowrap overflow-x-auto no-scrollbar gap-2 pt-2 -mx-1 px-1">
+                  {project.tags.map((tag) => (
+                    <span key={tag}
+                      className="text-[11px] font-bold font-sans border border-border px-3 py-1 uppercase text-muted group-hover:text-accent group-hover:border-accent transition-colors tracking-tight whitespace-nowrap">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </div>
-              <p className="text-sm text-muted leading-relaxed font-light">{project.desc}</p>
-              <div className="flex flex-nowrap overflow-x-auto no-scrollbar gap-2 pt-2 -mx-1 px-1">
-                {project.tags.map((tag) => (
-                  <span key={tag} className="text-[11px] font-bold font-sans border border-border px-3 py-1 uppercase text-muted group-hover:text-accent group-hover:border-accent transition-colors tracking-tight whitespace-nowrap">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+        })}
       </div>
     </section>
   );
