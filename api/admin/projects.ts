@@ -8,14 +8,17 @@ const redis = new Redis({
 });
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
+type FrameType = "none" | "phone" | "desktop";
+
 interface Project {
   id: string;
   title: string;
   desc: string;
   link: string;
   tags: string[];
-  images: string[];   // array de URLs (novo)
-  image?: string;     // legado — mantido para compatibilidade
+  images: string[];
+  image?: string;     // legado
+  frameType: FrameType;
 }
 
 // ─── Auth inline ──────────────────────────────────────────────────────────────
@@ -94,6 +97,7 @@ export default async function handler(req: any, res: any) {
         link: body.link || "",
         tags: Array.isArray(body.tags) ? body.tags : [],
         images: Array.isArray(body.images) ? body.images : [],
+        frameType: body.frameType || "none",
       };
       projects.push(newProject);
       await writeProjects(projects);
@@ -112,6 +116,7 @@ export default async function handler(req: any, res: any) {
         link: body.link ?? projects[idx].link,
         tags: Array.isArray(body.tags) ? body.tags : projects[idx].tags,
         images: Array.isArray(body.images) ? body.images : projects[idx].images,
+        frameType: body.frameType ?? projects[idx].frameType ?? "none",
       };
       await writeProjects(projects);
       return res.status(200).json({ project: projects[idx] });

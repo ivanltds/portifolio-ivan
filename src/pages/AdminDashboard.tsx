@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { Plus, Pencil, Trash2, X, Save, LogOut, ExternalLink, Tag, Upload, ImageIcon } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Save, LogOut, ExternalLink, Tag, ImageIcon, Smartphone, Monitor, Square } from "lucide-react";
+
+type FrameType = "none" | "phone" | "desktop";
 
 interface Project {
   id: string;
@@ -9,9 +11,16 @@ interface Project {
   tags: string[];
   images: string[];
   image?: string; // legado
+  frameType: FrameType;
 }
 
-const EMPTY = { title: "", desc: "", link: "", tags: [] as string[], images: [] as string[] };
+const EMPTY = { title: "", desc: "", link: "", tags: [] as string[], images: [] as string[], frameType: "none" as FrameType };
+
+const FRAME_OPTIONS: { value: FrameType; label: string; icon: React.ReactNode }[] = [
+  { value: "none",    label: "Sem moldura", icon: <Square size={14} /> },
+  { value: "phone",   label: "Celular",     icon: <Smartphone size={14} /> },
+  { value: "desktop", label: "Desktop",     icon: <Monitor size={14} /> },
+];
 
 // Normaliza projetos antigos
 function getImages(p: Project): string[] {
@@ -57,7 +66,7 @@ export default function AdminDashboard({ onLogout }: Props) {
   };
 
   const openEdit = (p: Project) => {
-    setForm({ title: p.title, desc: p.desc, link: p.link, tags: p.tags, images: getImages(p) });
+    setForm({ title: p.title, desc: p.desc, link: p.link, tags: p.tags, images: getImages(p), frameType: p.frameType || "none" });
     setTagsInput(p.tags.join(", "));
     setEditing(p); setIsNew(false); setError("");
   };
@@ -316,6 +325,27 @@ export default function AdminDashboard({ onLogout }: Props) {
                 {form.images.length > 1 && (
                   <p className="text-[10px] text-muted opacity-60">A primeira imagem é usada como capa no carrossel.</p>
                 )}
+              </div>
+
+              {/* Moldura */}
+              <div className="space-y-2">
+                <label className="text-[10px] uppercase tracking-widest font-bold text-muted">Moldura de dispositivo</label>
+                <div className="flex gap-2">
+                  {FRAME_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, frameType: opt.value }))}
+                      className={`flex-1 flex flex-col items-center gap-2 py-3 border text-[10px] uppercase tracking-widest font-bold transition-all
+                        ${form.frameType === opt.value
+                          ? "border-accent text-accent bg-accent/5"
+                          : "border-border text-muted hover:border-muted"}`}
+                    >
+                      {opt.icon}
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Título */}
