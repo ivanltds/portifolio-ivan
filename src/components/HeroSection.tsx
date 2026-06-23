@@ -31,15 +31,18 @@ export default function HeroSection({ getCldUrl }: Props) {
           ENTREGANDO DE<br className="hidden sm:block" />
           FORMA <span className="text-accent underline decoration-2 underline-offset-8">PREVISÍVEL.</span>
         </motion.h1>
-        <motion.p variants={itemVariants} className="text-xl lg:text-3xl text-muted max-w-2xl font-light leading-snug mb-12">
+        <motion.p variants={itemVariants} className="text-xl lg:text-3xl text-muted max-w-2xl font-light leading-snug mb-4">
           10 anos transformando complexidade técnica em eficiência operacional para empresas que não aceitam gargalos na execução.
+        </motion.p>
+        <motion.p variants={itemVariants} className="text-base lg:text-lg text-foreground max-w-xl font-medium leading-relaxed mb-12">
+          Ajudo empresas a tirar projetos de software do papel com previsibilidade de prazo e escopo — sem surpresas na entrega.
         </motion.p>
         <motion.div variants={itemVariants} className="flex flex-wrap gap-4">
           <button
             onClick={() => scrollToSection("diagnostico")}
             className="bg-accent text-white px-8 py-5 text-sm font-bold uppercase tracking-widest flex items-center gap-3 hover:scale-105 transition-transform active:scale-95 shadow-lg shadow-accent/20"
           >
-            Agendar Diagnóstico Gratuito <ArrowRight size={18} />
+            Agendar Conversa de 20 min <ArrowRight size={18} />
           </button>
           <a
             href="https://wa.me/5575998723992"
