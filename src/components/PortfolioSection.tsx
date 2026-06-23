@@ -55,22 +55,22 @@ function Carousel({ images, title }: { images: string[]; title: string }) {
 
   if (images.length === 0) {
     return (
-      <div className="aspect-video bg-surface border border-border flex items-center justify-center">
+      <div className="h-48 bg-surface border border-border flex items-center justify-center">
         <span className="text-xs text-muted/30 uppercase tracking-widest">Sem imagem</span>
       </div>
     );
   }
 
   return (
-    <div className="relative aspect-video overflow-hidden border border-border group">
+    <div className="relative overflow-hidden border border-border group bg-[#0a0a0a]" style={{ minHeight: "200px", maxHeight: "520px" }}>
       {/* Slides */}
       {images.map((url, i) => (
         <img
           key={i}
           src={url}
           alt={`${title} — ${i + 1}`}
-          className={`absolute inset-0 w-full h-full object-cover transition-all duration-700
-            ${i === current ? "opacity-100 scale-100" : "opacity-0 scale-110"}`}
+          className={`block w-full h-auto max-h-[520px] object-contain transition-all duration-700
+            ${i === current ? "opacity-100" : "opacity-0 absolute inset-0"}`}
           loading="lazy"
           decoding="async"
         />
