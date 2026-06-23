@@ -86,7 +86,7 @@ export default function ContactSection() {
             <textarea name="desafio" placeholder="Ex: Atrasos constantes, bugs críticos em produção, falta de escala na infra..." rows={4} required className="w-full bg-transparent border border-border p-6 focus:border-accent focus:outline-none transition-colors text-sm font-light resize-none" />
           </div>
           <button type="submit" className="w-full bg-accent text-white py-6 font-bold text-xs uppercase tracking-[2px] transition-all flex items-center justify-center gap-3 hover:bg-blue-700 shadow-xl shadow-accent/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
-            Solicitar Diagnóstico Estratégico
+            Agendar uma Conversa de 20 min
             <ArrowRight size={16} />
           </button>
           <p className="text-[9px] text-center text-muted uppercase tracking-[1.5px] font-bold">O envio agora é automático. Entrarei em contato em até 24h.</p>
