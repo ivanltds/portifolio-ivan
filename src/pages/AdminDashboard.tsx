@@ -116,7 +116,7 @@ export default function AdminDashboard({ onLogout }: Props) {
       if (isNew) {
         res = await fetch("/api/admin/projects", { method: "POST", headers, body: JSON.stringify(payload) });
       } else {
-        res = await fetch(`/api/admin/projects/${editing!.id}`, { method: "PUT", headers, body: JSON.stringify(payload) });
+        res = await fetch(`/api/admin/projects?id=${editing!.id}`, { method: "PUT", headers, body: JSON.stringify(payload) });
       }
       if (!res.ok) throw new Error();
       await fetchProjects();
@@ -131,7 +131,7 @@ export default function AdminDashboard({ onLogout }: Props) {
   const handleDelete = async (id: string, title: string) => {
     if (!confirm(`Remover "${title}"?`)) return;
     try {
-      await fetch(`/api/admin/projects/${id}`, { method: "DELETE", headers });
+      await fetch(`/api/admin/projects?id=${id}`, { method: "DELETE", headers });
       setProjects((prev) => prev.filter((p) => p.id !== id));
     } catch {
       setError("Erro ao remover.");

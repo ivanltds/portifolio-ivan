@@ -64,9 +64,10 @@ export default async function handler(req: any, res: any) {
     });
   }
 
-  const urlParts = req.url?.split("/").filter(Boolean) || [];
-  const idFromUrl = urlParts[urlParts.length - 1];
-  const hasId = idFromUrl && idFromUrl !== "projects";
+  // ID vem como query param: /api/admin/projects?id=123
+  // (Vercel serverless não roteia /api/admin/projects/:id automaticamente)
+  const idFromQuery = req.query?.id as string | undefined;
+  const hasId = !!idFromQuery;
 
   try {
     // GET /api/admin/projects
@@ -94,7 +95,7 @@ export default async function handler(req: any, res: any) {
     // PUT /api/admin/projects/:id
     if (req.method === "PUT" && hasId) {
       const projects = await readProjects();
-      const idx = projects.findIndex((p) => p.id === idFromUrl);
+      const idx = projects.findIndex((p) => p.id === idFromQuery);
       if (idx === -1) return res.status(404).json({ error: "Projeto não encontrado" });
       projects[idx] = {
         ...projects[idx],
@@ -111,7 +112,7 @@ export default async function handler(req: any, res: any) {
     // DELETE /api/admin/projects/:id
     if (req.method === "DELETE" && hasId) {
       const projects = await readProjects();
-      const filtered = projects.filter((p) => p.id !== idFromUrl);
+      const filtered = projects.filter((p) => p.id !== idFromQuery);
       await writeProjects(filtered);
       return res.status(200).json({ ok: true });
     }

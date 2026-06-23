@@ -30,8 +30,8 @@ async function startServer() {
   app.post("/api/admin/login", loginHandler);
   app.get("/api/admin/projects", adminProjectsHandler);
   app.post("/api/admin/projects", adminProjectsHandler);
-  app.put("/api/admin/projects/:id", adminProjectsHandler);
-  app.delete("/api/admin/projects/:id", adminProjectsHandler);
+  app.put("/api/admin/projects", adminProjectsHandler);
+  app.delete("/api/admin/projects", adminProjectsHandler);
   app.post("/api/admin/upload", uploadHandler);
 
   // Vite middleware
