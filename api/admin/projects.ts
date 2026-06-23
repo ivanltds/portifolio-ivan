@@ -1,14 +1,29 @@
+import crypto from "crypto";
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
-import { verifyToken } from "./auth";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_FILE = path.join(__dirname, "../../data/projects.json");
+function getAdminToken(): string {
+  const pass = process.env.ADMIN_PASSWORD || "admin123";
+  return crypto.createHmac("sha256", "portfolio-admin-salt").update(pass).digest("hex");
+}
+
+function verifyToken(req: any): boolean {
+  const auth = (req.headers["authorization"] || "") as string;
+  const token = auth.replace("Bearer ", "").trim();
+  return token === getAdminToken();
+}
+
+// process.cwd() aponta para a raiz do projeto no Vercel
+const DATA_FILE = path.join(process.cwd(), "data", "projects.json");
 
 function readProjects(): any[] {
-  const raw = fs.readFileSync(DATA_FILE, "utf-8");
-  return JSON.parse(raw).projects;
+  try {
+    const raw = fs.readFileSync(DATA_FILE, "utf-8");
+    return JSON.parse(raw).projects || [];
+  } catch (e) {
+    console.error("[admin/projects] read error:", e);
+    return [];
+  }
 }
 
 function writeProjects(projects: any[]): void {
@@ -16,10 +31,17 @@ function writeProjects(projects: any[]): void {
 }
 
 export default function handler(req: any, res: any) {
-  if (!verifyToken(req)) return res.status(401).json({ error: "Não autorizado" });
+  if (!verifyToken(req)) {
+    console.log("[admin/projects] unauthorized");
+    return res.status(401).json({ error: "Não autorizado" });
+  }
+
+  console.log("[admin/projects] method:", req.method);
 
   if (req.method === "GET") {
-    return res.json({ projects: readProjects() });
+    const projects = readProjects();
+    console.log("[admin/projects] returning", projects.length, "projects");
+    return res.json({ projects });
   }
 
   if (req.method === "POST") {
