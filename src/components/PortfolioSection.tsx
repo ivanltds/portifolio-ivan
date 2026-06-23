@@ -76,7 +76,7 @@ export default function PortfolioSection({ getCldUrl }: Props) {
           >
             <div className="relative aspect-video overflow-hidden border border-border transition-all duration-700">
               <img
-                src={getCldUrl(project.image)}
+                src={project.image?.startsWith("http") ? project.image : getCldUrl(project.image)}
                 alt={project.title}
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-700"
