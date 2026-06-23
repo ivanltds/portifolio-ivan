@@ -20,7 +20,22 @@ export default async function handler(req: any, res: any) {
   if (req.method !== "POST") return res.status(405).end();
   if (!verifyToken(req)) return res.status(401).json({ error: "Não autorizado" });
 
-  const { image, filename } = req.body || {};
+  // Parsear body manualmente — req.body pode vir undefined no Vercel para payloads grandes
+  let body = req.body;
+  if (typeof body === "string") {
+    try { body = JSON.parse(body); } catch { body = {}; }
+  }
+  if (!body || !body.image) {
+    body = await new Promise<any>((resolve) => {
+      let data = "";
+      req.on("data", (chunk: any) => (data += chunk));
+      req.on("end", () => {
+        try { resolve(JSON.parse(data)); } catch { resolve({}); }
+      });
+    });
+  }
+
+  const { image, filename } = body || {};
   if (!image) return res.status(400).json({ error: "Imagem não enviada" });
 
   cloudinary.config({

@@ -64,14 +64,28 @@ export default function AdminDashboard({ onLogout }: Props) {
 
   const closePanel = () => { setEditing(null); setIsNew(false); setError(""); };
 
+  // Comprime imagem para no máximo 1200px e qualidade 0.8 antes de enviar
+  const compressImage = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        const MAX = 1200;
+        const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        resolve(canvas.toDataURL("image/jpeg", 0.82));
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
+
   // Upload de uma imagem → Cloudinary
   const uploadFile = async (file: File): Promise<string> => {
-    const base64 = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
+    const base64 = await compressImage(file);
     const res = await fetch("/api/admin/upload", {
       method: "POST",
       headers,
