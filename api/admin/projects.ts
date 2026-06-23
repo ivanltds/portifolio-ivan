@@ -10,15 +10,27 @@ const redis = new Redis({
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 type FrameType = "none" | "phone" | "desktop";
 
+interface ProjectImage {
+  url: string;
+  frame: FrameType;
+}
+
 interface Project {
   id: string;
   title: string;
   desc: string;
   link: string;
   tags: string[];
-  images: string[];
-  image?: string;     // legado
-  frameType: FrameType;
+  images: (string | ProjectImage)[];  // suporta string (legado) e objeto {url, frame}
+  image?: string;                      // legado
+  frameType?: FrameType;               // legado — substituído por frame por foto
+}
+
+// Normaliza imagens antigas (string → objeto)
+function normalizeImages(images: (string | ProjectImage)[]): ProjectImage[] {
+  return images.map((img) =>
+    typeof img === "string" ? { url: img, frame: "none" } : img
+  );
 }
 
 // ─── Auth inline ──────────────────────────────────────────────────────────────
@@ -37,12 +49,11 @@ function verifyToken(req: any): boolean {
   return token === expected;
 }
 
-// ─── Normaliza projetos antigos (image → images[]) ────────────────────────────
+// ─── Normaliza projetos antigos ───────────────────────────────────────────────
 function normalize(p: any): Project {
-  if (!p.images || p.images.length === 0) {
-    return { ...p, images: p.image ? [p.image] : [] };
-  }
-  return p;
+  let images = p.images || [];
+  if (images.length === 0 && p.image) images = [p.image];
+  return { ...p, images: normalizeImages(images) };
 }
 
 // ─── KV helpers ───────────────────────────────────────────────────────────────

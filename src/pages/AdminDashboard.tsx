@@ -3,30 +3,45 @@ import { Plus, Pencil, Trash2, X, Save, LogOut, ExternalLink, Tag, ImageIcon, Sm
 
 type FrameType = "none" | "phone" | "desktop";
 
+interface ProjectImage { url: string; frame: FrameType; }
+
 interface Project {
   id: string;
   title: string;
   desc: string;
   link: string;
   tags: string[];
-  images: string[];
-  image?: string; // legado
-  frameType: FrameType;
+  images: (string | ProjectImage)[];
+  image?: string;
 }
 
-const EMPTY = { title: "", desc: "", link: "", tags: [] as string[], images: [] as string[], frameType: "none" as FrameType };
+type FormImage = ProjectImage;
 
-const FRAME_OPTIONS: { value: FrameType; label: string; icon: React.ReactNode }[] = [
-  { value: "none",    label: "Sem moldura", icon: <Square size={14} /> },
-  { value: "phone",   label: "Celular",     icon: <Smartphone size={14} /> },
-  { value: "desktop", label: "Desktop",     icon: <Monitor size={14} /> },
-];
+interface FormState {
+  title: string;
+  desc: string;
+  link: string;
+  tags: string[];
+  images: FormImage[];
+}
 
-// Normaliza projetos antigos
-function getImages(p: Project): string[] {
-  if (p.images?.length > 0) return p.images;
-  if (p.image) return [p.image];
-  return [];
+const EMPTY: FormState = { title: "", desc: "", link: "", tags: [], images: [] };
+
+const FRAME_ICONS: Record<FrameType, React.ReactNode> = {
+  none:    <Square size={10} />,
+  phone:   <Smartphone size={10} />,
+  desktop: <Monitor size={10} />,
+};
+
+function normalizeImages(raw: (string | ProjectImage)[]): FormImage[] {
+  return raw.map((img) =>
+    typeof img === "string" ? { url: img, frame: "none" as FrameType } : img
+  );
+}
+
+function getImages(p: Project): FormImage[] {
+  const imgs = p.images?.length ? p.images : p.image ? [p.image] : [];
+  return normalizeImages(imgs);
 }
 
 interface Props { onLogout: () => void; }
@@ -36,7 +51,7 @@ export default function AdminDashboard({ onLogout }: Props) {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Project | null>(null);
   const [isNew, setIsNew] = useState(false);
-  const [form, setForm] = useState(EMPTY);
+  const [form, setForm] = useState<FormState>(EMPTY);
   const [tagsInput, setTagsInput] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -52,29 +67,20 @@ export default function AdminDashboard({ onLogout }: Props) {
       const res = await fetch("/api/admin/projects", { headers });
       const data = await res.json();
       setProjects(data.projects || []);
-    } catch {
-      setError("Erro ao carregar projetos.");
-    } finally {
-      setLoading(false);
-    }
+    } catch { setError("Erro ao carregar projetos."); }
+    finally { setLoading(false); }
   };
 
   useEffect(() => { fetchProjects(); }, []);
 
-  const openNew = () => {
-    setForm(EMPTY); setTagsInput(""); setEditing(null); setIsNew(true); setError("");
-  };
-
+  const openNew = () => { setForm(EMPTY); setTagsInput(""); setEditing(null); setIsNew(true); setError(""); };
   const openEdit = (p: Project) => {
-    setForm({ title: p.title, desc: p.desc, link: p.link, tags: p.tags, images: getImages(p), frameType: p.frameType || "none" });
+    setForm({ title: p.title, desc: p.desc, link: p.link, tags: p.tags, images: getImages(p) });
     setTagsInput(p.tags.join(", "));
     setEditing(p); setIsNew(false); setError("");
   };
-
   const closePanel = () => { setEditing(null); setIsNew(false); setError(""); };
 
-  // Redimensiona para no máximo 1400px mantendo o formato original
-  // PNG → mantém transparência; JPEG/outros → comprime com qualidade 0.85
   const compressImage = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
       const img = new Image();
@@ -86,35 +92,23 @@ export default function AdminDashboard({ onLogout }: Props) {
         canvas.width = Math.round(img.width * scale);
         canvas.height = Math.round(img.height * scale);
         const ctx = canvas.getContext("2d")!;
-        // PNG: preserva canal alpha — não preenche fundo
-        // JPEG: preenche fundo branco para evitar artefatos
         const isPng = file.type === "image/png";
-        if (!isPng) {
-          ctx.fillStyle = "#ffffff";
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
+        if (!isPng) { ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, canvas.width, canvas.height); }
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         URL.revokeObjectURL(url);
-        resolve(isPng
-          ? canvas.toDataURL("image/png")
-          : canvas.toDataURL("image/jpeg", 0.85));
+        resolve(isPng ? canvas.toDataURL("image/png") : canvas.toDataURL("image/jpeg", 0.85));
       };
       img.onerror = reject;
       img.src = url;
     });
 
-  // Upload de uma imagem → Cloudinary
   const uploadFile = async (file: File): Promise<string> => {
     const base64 = await compressImage(file);
     const res = await fetch("/api/admin/upload", {
-      method: "POST",
-      headers,
+      method: "POST", headers,
       body: JSON.stringify({ image: base64, filename: file.name }),
     });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || "Falha no upload");
-    }
+    if (!res.ok) { const err = await res.json(); throw new Error(err.error || "Falha"); }
     const { url } = await res.json();
     return url;
   };
@@ -122,42 +116,32 @@ export default function AdminDashboard({ onLogout }: Props) {
   const handleFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
-    setUploading(true);
-    setError("");
+    setUploading(true); setError("");
     try {
-      // Upload em paralelo
       const urls = await Promise.all(files.map(uploadFile));
-      setForm((f) => ({ ...f, images: [...f.images, ...urls] }));
-    } catch (err: any) {
-      setError("Erro no upload: " + err.message);
-    } finally {
-      setUploading(false);
-      if (fileRef.current) fileRef.current.value = "";
-    }
+      setForm((f) => ({ ...f, images: [...f.images, ...urls.map((url) => ({ url, frame: "none" as FrameType }))] }));
+    } catch (err: any) { setError("Erro no upload: " + err.message); }
+    finally { setUploading(false); if (fileRef.current) fileRef.current.value = ""; }
   };
 
-  const removeImage = (idx: number) => {
+  const removeImage = (idx: number) =>
     setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== idx) }));
-  };
+
+  const setImageFrame = (idx: number, frame: FrameType) =>
+    setForm((f) => ({ ...f, images: f.images.map((img, i) => i === idx ? { ...img, frame } : img) }));
 
   const handleSave = async () => {
     setSaving(true); setError("");
     const payload = { ...form, tags: tagsInput.split(",").map((t) => t.trim()).filter(Boolean) };
     try {
-      let res;
-      if (isNew) {
-        res = await fetch("/api/admin/projects", { method: "POST", headers, body: JSON.stringify(payload) });
-      } else {
-        res = await fetch(`/api/admin/projects?id=${editing!.id}`, { method: "PUT", headers, body: JSON.stringify(payload) });
-      }
+      const res = isNew
+        ? await fetch("/api/admin/projects", { method: "POST", headers, body: JSON.stringify(payload) })
+        : await fetch(`/api/admin/projects?id=${editing!.id}`, { method: "PUT", headers, body: JSON.stringify(payload) });
       if (!res.ok) throw new Error();
       await fetchProjects();
       closePanel();
-    } catch {
-      setError("Erro ao salvar. Tente novamente.");
-    } finally {
-      setSaving(false);
-    }
+    } catch { setError("Erro ao salvar."); }
+    finally { setSaving(false); }
   };
 
   const handleDelete = async (id: string, title: string) => {
@@ -165,9 +149,7 @@ export default function AdminDashboard({ onLogout }: Props) {
     try {
       await fetch(`/api/admin/projects?id=${id}`, { method: "DELETE", headers });
       setProjects((prev) => prev.filter((p) => p.id !== id));
-    } catch {
-      setError("Erro ao remover.");
-    }
+    } catch { setError("Erro ao remover."); }
   };
 
   const panelOpen = isNew || editing !== null;
@@ -195,9 +177,7 @@ export default function AdminDashboard({ onLogout }: Props) {
           </button>
         </div>
 
-        {error && !panelOpen && (
-          <p className="text-xs text-red-500 font-bold uppercase tracking-widest mb-6">{error}</p>
-        )}
+        {error && !panelOpen && <p className="text-xs text-red-500 font-bold uppercase tracking-widest mb-6">{error}</p>}
 
         {loading ? (
           <div className="text-xs text-muted uppercase tracking-widest animate-pulse">Carregando...</div>
@@ -206,12 +186,14 @@ export default function AdminDashboard({ onLogout }: Props) {
             {projects.map((project) => {
               const imgs = getImages(project);
               return (
-                <div key={project.id} className="flex items-center gap-4 p-5 border border-border bg-background hover:border-accent/40 transition-all group">
-                  {/* Thumbnails */}
+                <div key={project.id} className="flex items-center gap-4 p-5 border border-border hover:border-accent/40 transition-all group">
                   <div className="flex gap-1 shrink-0">
-                    {imgs.slice(0, 3).map((url, i) => (
-                      <div key={i} className="w-16 h-12 border border-border/50 overflow-hidden bg-surface">
-                        <img src={url} alt="" className="w-full h-full object-cover" />
+                    {imgs.slice(0, 3).map((img, i) => (
+                      <div key={i} className="w-16 h-12 border border-border/50 overflow-hidden bg-surface relative">
+                        <img src={img.url} alt="" className="w-full h-full object-cover" />
+                        <span className="absolute bottom-0.5 right-0.5 text-[8px]">
+                          {img.frame === "phone" ? "📱" : img.frame === "desktop" ? "🖥️" : ""}
+                        </span>
                       </div>
                     ))}
                     {imgs.length === 0 && (
@@ -225,14 +207,10 @@ export default function AdminDashboard({ onLogout }: Props) {
                       </div>
                     )}
                   </div>
-
-                  {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-1">
                       <span className="font-bold text-sm uppercase tracking-tight truncate">{project.title}</span>
-                      <a href={project.link} target="_blank" rel="noreferrer" className="text-muted hover:text-accent transition-colors shrink-0">
-                        <ExternalLink size={12} />
-                      </a>
+                      <a href={project.link} target="_blank" rel="noreferrer" className="text-muted hover:text-accent shrink-0"><ExternalLink size={12} /></a>
                     </div>
                     <p className="text-xs text-muted truncate mb-2">{project.desc}</p>
                     <div className="flex gap-1 flex-wrap">
@@ -241,8 +219,6 @@ export default function AdminDashboard({ onLogout }: Props) {
                       ))}
                     </div>
                   </div>
-
-                  {/* Actions */}
                   <div className="flex items-center gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button onClick={() => openEdit(project)} className="p-2 border border-border hover:border-accent hover:text-accent transition-all"><Pencil size={14} /></button>
                     <button onClick={() => handleDelete(project.id, project.title)} className="p-2 border border-border hover:border-red-500 hover:text-red-500 transition-all"><Trash2 size={14} /></button>
@@ -250,7 +226,6 @@ export default function AdminDashboard({ onLogout }: Props) {
                 </div>
               );
             })}
-
             {projects.length === 0 && (
               <div className="text-center py-20 border border-dashed border-border">
                 <p className="text-xs text-muted uppercase tracking-widest">Nenhum projeto cadastrado</p>
@@ -260,92 +235,73 @@ export default function AdminDashboard({ onLogout }: Props) {
         )}
       </div>
 
-      {/* Side panel */}
       {panelOpen && (
         <>
           <div className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40" onClick={closePanel} />
           <aside className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-background border-l border-border z-50 flex flex-col shadow-2xl">
             <div className="flex items-center justify-between px-8 py-6 border-b border-border">
               <h2 className="text-sm font-extrabold uppercase tracking-widest">{isNew ? "Novo Projeto" : "Editar Projeto"}</h2>
-              <button onClick={closePanel} className="text-muted hover:text-accent transition-colors"><X size={18} /></button>
+              <button onClick={closePanel} className="text-muted hover:text-accent"><X size={18} /></button>
             </div>
 
             <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
 
-              {/* Grid de imagens */}
-              <div className="space-y-3">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-muted flex items-center gap-2">
-                  Imagens do Projeto
-                  <span className="opacity-50 normal-case tracking-normal font-normal">({form.images.length} foto{form.images.length !== 1 ? "s" : ""})</span>
+              {/* Grid de imagens com seletor de frame por foto */}
+              <div className="space-y-2">
+                <label className="text-[10px] uppercase tracking-widest font-bold text-muted">
+                  Fotos <span className="opacity-50 normal-case font-normal">({form.images.length})</span>
                 </label>
 
                 <div className="grid grid-cols-3 gap-2">
-                  {form.images.map((url, idx) => (
-                    <div key={idx} className="relative aspect-video border border-border overflow-hidden group/img">
-                      <img src={url} alt="" className="w-full h-full object-cover" />
-                      {idx === 0 && (
-                        <span className="absolute top-1 left-1 text-[8px] bg-accent text-white px-1.5 py-0.5 uppercase tracking-widest font-bold">Capa</span>
-                      )}
-                      <button
-                        onClick={() => removeImage(idx)}
-                        className="absolute top-1 right-1 bg-background/80 p-1 opacity-0 group-hover/img:opacity-100 transition-opacity hover:text-red-500"
-                      >
-                        <X size={10} />
-                      </button>
+                  {form.images.map((img, idx) => (
+                    <div key={idx} className="space-y-1">
+                      <div className="relative aspect-video border border-border overflow-hidden group/img bg-surface">
+                        <img src={img.url} alt="" className="w-full h-full object-cover" />
+                        {idx === 0 && (
+                          <span className="absolute top-1 left-1 text-[8px] bg-accent text-white px-1.5 py-0.5 uppercase tracking-widest font-bold">Capa</span>
+                        )}
+                        <button
+                          onClick={() => removeImage(idx)}
+                          className="absolute top-1 right-1 bg-background/80 p-1 opacity-0 group-hover/img:opacity-100 transition-opacity hover:text-red-500"
+                        >
+                          <X size={10} />
+                        </button>
+                      </div>
+                      {/* Frame selector por foto */}
+                      <div className="flex gap-0.5">
+                        {(["none", "phone", "desktop"] as FrameType[]).map((f) => (
+                          <button
+                            key={f}
+                            onClick={() => setImageFrame(idx, f)}
+                            title={f === "none" ? "Sem moldura" : f === "phone" ? "Celular" : "Desktop"}
+                            className={`flex-1 flex items-center justify-center py-1 border text-[9px] transition-all
+                              ${img.frame === f ? "border-accent text-accent bg-accent/5" : "border-border text-muted hover:border-muted"}`}
+                          >
+                            {FRAME_ICONS[f]}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   ))}
 
                   {/* Botão adicionar */}
-                  <button
-                    onClick={() => !uploading && fileRef.current?.click()}
-                    disabled={uploading}
-                    className={`aspect-video border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-all
-                      ${uploading ? "border-accent/30 cursor-wait" : "border-border hover:border-accent cursor-pointer"}`}
-                  >
-                    {uploading ? (
-                      <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <>
-                        <Plus size={16} className="text-muted" />
-                        <span className="text-[9px] text-muted uppercase tracking-widest">Adicionar</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={handleFilesChange}
-                />
-
-                {form.images.length > 1 && (
-                  <p className="text-[10px] text-muted opacity-60">A primeira imagem é usada como capa no carrossel.</p>
-                )}
-              </div>
-
-              {/* Moldura */}
-              <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-muted">Moldura de dispositivo</label>
-                <div className="flex gap-2">
-                  {FRAME_OPTIONS.map((opt) => (
+                  <div className="space-y-1">
                     <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => setForm((f) => ({ ...f, frameType: opt.value }))}
-                      className={`flex-1 flex flex-col items-center gap-2 py-3 border text-[10px] uppercase tracking-widest font-bold transition-all
-                        ${form.frameType === opt.value
-                          ? "border-accent text-accent bg-accent/5"
-                          : "border-border text-muted hover:border-muted"}`}
+                      onClick={() => !uploading && fileRef.current?.click()}
+                      disabled={uploading}
+                      className={`w-full aspect-video border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-all
+                        ${uploading ? "border-accent/30 cursor-wait" : "border-border hover:border-accent cursor-pointer"}`}
                     >
-                      {opt.icon}
-                      {opt.label}
+                      {uploading
+                        ? <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                        : <><Plus size={14} className="text-muted" /><span className="text-[9px] text-muted uppercase">Adicionar</span></>
+                      }
                     </button>
-                  ))}
+                    <div className="h-[26px]" /> {/* espaço para alinhar com seletores */}
+                  </div>
                 </div>
+
+                <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFilesChange} />
               </div>
 
               {/* Título */}
