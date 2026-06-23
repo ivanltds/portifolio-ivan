@@ -30,82 +30,157 @@ function getImages(p: Project): ProjectImage[] {
   return normalizeImages(imgs as (string | ProjectImage)[]);
 }
 
-// ─── Moldura celular ──────────────────────────────────────────────────────────
+// ─── iPhone 17 Pro Max ───────────────────────────────────────────────────────
 function PhoneFrame({ children }: { children: React.ReactNode }) {
+  // Titânio natural — gradiente metálico multidireção
+  const titanium = "linear-gradient(160deg, #7a7a7a 0%, #5c5c5c 18%, #3e3e3e 40%, #4a4a4a 60%, #606060 80%, #4e4e4e 100%)";
   return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "20px 0" }}>
-      <div style={{ position: "relative", width: "200px" }}>
-        {/* Sombra externa */}
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "16px 0 20px" }}>
+      <div style={{ position: "relative", width: "206px" }}>
+
+        {/* Anel externo de titânio */}
         <div style={{
-          position: "absolute", inset: "-2px",
-          borderRadius: "46px",
-          background: "linear-gradient(145deg, #444 0%, #222 100%)",
-          boxShadow: "0 25px 70px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04)",
+          position: "absolute", inset: 0,
+          borderRadius: "52px",
+          background: titanium,
+          boxShadow: [
+            "0 30px 80px rgba(0,0,0,0.75)",
+            "0 0 0 0.5px rgba(255,255,255,0.12)",
+            "inset 0 1px 0 rgba(255,255,255,0.18)",
+            "inset 0 -1px 0 rgba(0,0,0,0.4)",
+          ].join(", "),
         }} />
-        {/* Corpo */}
+
+        {/* Corpo interno (preto, bezel fino) */}
         <div style={{
           position: "relative",
-          background: "linear-gradient(160deg, #2c2c2c 0%, #181818 100%)",
-          borderRadius: "44px",
-          padding: "12px 8px 16px",
+          margin: "5px",
+          background: "#0a0a0a",
+          borderRadius: "47px",
+          padding: "10px 6px 14px",
+          boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.04)",
         }}>
           {/* Dynamic Island */}
           <div style={{
-            width: "72px", height: "22px",
+            width: "80px", height: "28px",
             background: "#000",
-            borderRadius: "16px",
-            margin: "0 auto 8px",
-            boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)",
+            borderRadius: "20px",
+            margin: "0 auto 6px",
+            boxShadow: "0 0 0 1.5px #1a1a1a, inset 0 0 8px rgba(0,0,0,0.8)",
           }} />
           {/* Tela */}
-          <div style={{ borderRadius: "28px", overflow: "hidden", background: "#000", lineHeight: 0 }}>
+          <div style={{
+            borderRadius: "36px", overflow: "hidden",
+            background: "#000", lineHeight: 0,
+            boxShadow: "inset 0 0 0 0.5px rgba(255,255,255,0.06)",
+          }}>
             {children}
           </div>
-          {/* Home bar */}
+          {/* Home indicator */}
           <div style={{
-            width: "52px", height: "3px",
-            background: "rgba(255,255,255,0.2)",
-            borderRadius: "3px",
-            margin: "12px auto 0",
+            width: "56px", height: "4px",
+            background: "rgba(255,255,255,0.22)",
+            borderRadius: "4px",
+            margin: "10px auto 0",
           }} />
         </div>
-        {/* Botões esquerdos */}
-        <div style={{ position: "absolute", left: "-3px", top: "64px", width: "2px", height: "22px", background: "#2a2a2a", borderRadius: "2px 0 0 2px" }} />
-        <div style={{ position: "absolute", left: "-3px", top: "96px", width: "2px", height: "34px", background: "#2a2a2a", borderRadius: "2px 0 0 2px" }} />
-        <div style={{ position: "absolute", left: "-3px", top: "138px", width: "2px", height: "34px", background: "#2a2a2a", borderRadius: "2px 0 0 2px" }} />
-        {/* Botão direito */}
-        <div style={{ position: "absolute", right: "-3px", top: "90px", width: "2px", height: "48px", background: "#2a2a2a", borderRadius: "0 2px 2px 0" }} />
+
+        {/* Action button (esquerda, topo) */}
+        <div style={{
+          position: "absolute", left: "-3.5px", top: "72px",
+          width: "3px", height: "20px",
+          background: "linear-gradient(to right, #555, #3a3a3a)",
+          borderRadius: "2px 0 0 2px",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15)",
+        }} />
+        {/* Volume up */}
+        <div style={{
+          position: "absolute", left: "-3.5px", top: "106px",
+          width: "3px", height: "36px",
+          background: "linear-gradient(to right, #555, #3a3a3a)",
+          borderRadius: "2px 0 0 2px",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15)",
+        }} />
+        {/* Volume down */}
+        <div style={{
+          position: "absolute", left: "-3.5px", top: "150px",
+          width: "3px", height: "36px",
+          background: "linear-gradient(to right, #555, #3a3a3a)",
+          borderRadius: "2px 0 0 2px",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15)",
+        }} />
+        {/* Power button */}
+        <div style={{
+          position: "absolute", right: "-3.5px", top: "110px",
+          width: "3px", height: "56px",
+          background: "linear-gradient(to left, #555, #3a3a3a)",
+          borderRadius: "0 2px 2px 0",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15)",
+        }} />
       </div>
     </div>
   );
 }
 
-// ─── Moldura desktop ──────────────────────────────────────────────────────────
+// ─── Apple Studio Display (monitor Mac) ──────────────────────────────────────
 function DesktopFrame({ children }: { children: React.ReactNode }) {
+  const silver = "linear-gradient(175deg, #e8e8e8 0%, #d0d0d0 40%, #c4c4c4 60%, #d8d8d8 100%)";
+  const silverDark = "linear-gradient(to bottom, #c8c8c8, #b0b0b0)";
   return (
-    <div style={{ padding: "20px 8px 0" }}>
+    <div style={{ padding: "16px 4px 0" }}>
       {/* Monitor */}
       <div style={{
         position: "relative",
-        background: "linear-gradient(160deg, #2c2c2c 0%, #181818 100%)",
-        borderRadius: "10px",
-        padding: "10px 10px 8px",
-        boxShadow: "0 0 0 1px rgba(255,255,255,0.04), 0 20px 60px rgba(0,0,0,0.6)",
+        background: silver,
+        borderRadius: "14px 14px 6px 6px",
+        padding: "8px 8px 16px",
+        boxShadow: [
+          "0 0 0 0.5px rgba(0,0,0,0.25)",
+          "0 20px 60px rgba(0,0,0,0.55)",
+          "inset 0 1px 0 rgba(255,255,255,0.9)",
+          "inset 0 -1px 0 rgba(0,0,0,0.1)",
+        ].join(", "),
       }}>
-        {/* Câmera */}
-        <div style={{ display: "flex", justifyContent: "center", height: "14px", alignItems: "center", marginBottom: "5px" }}>
-          <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#353535" }} />
+        {/* FaceTime camera */}
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "12px", marginBottom: "5px" }}>
+          <div style={{
+            width: "5px", height: "5px", borderRadius: "50%",
+            background: "radial-gradient(circle at 35% 35%, #555 0%, #222 60%, #111 100%)",
+            boxShadow: "0 0 0 1px rgba(0,0,0,0.3), inset 0 0 2px rgba(255,255,255,0.15)",
+          }} />
         </div>
         {/* Tela */}
-        <div style={{ borderRadius: "4px", overflow: "hidden", background: "#000", lineHeight: 0 }}>
+        <div style={{
+          borderRadius: "3px", overflow: "hidden",
+          background: "#000", lineHeight: 0,
+          boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.5)",
+        }}>
           {children}
         </div>
-        <div style={{ height: "6px" }} />
+        {/* Chin / logo Apple */}
+        <div style={{ height: "10px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <svg width="10" height="12" viewBox="0 0 14 17" fill="none">
+            <path d="M13.2 13.1c-.3.6-.6 1.2-1 1.7-.5.7-.9 1.2-1.3 1.4-.5.3-1.1.4-1.7.4-.4 0-1-.1-1.6-.4-.6-.3-1.2-.4-1.7-.4-.5 0-1.1.1-1.7.4-.6.3-1.1.4-1.5.4-.6 0-1.1-.1-1.6-.4-.5-.3-.9-.8-1.3-1.5C.2 14 0 13.4 0 12.7c0-.8.2-1.6.6-2.2.3-.5.8-1 1.4-1.3.6-.3 1.2-.5 1.9-.5.5 0 1.1.2 1.8.5.7.3 1.1.5 1.3.5.2 0 .7-.2 1.4-.5.8-.3 1.4-.5 1.9-.4.7 0 1.3.2 1.8.5.3.2.6.4.8.7-.6.4-1.1.9-1.3 1.6-.2.6-.1 1.3.2 2zM9.7.2C9.2.7 8.5 1.1 7.7 1.3 7 1.4 6.3 1.3 5.7 1.1c0-.1 0-.2 0-.3 0-.8.3-1.5.8-2C7.1.3 7.8 0 8.5 0c.1 0 .1 0 .2 0 .3.1.6.1.9.2z" fill="rgba(0,0,0,0.35)"/>
+          </svg>
+        </div>
       </div>
-      {/* Pescoço */}
-      <div style={{ width: "32px", height: "22px", background: "#222", margin: "0 auto" }} />
-      {/* Base */}
-      <div style={{ width: "90px", height: "6px", background: "linear-gradient(to bottom, #2a2a2a, #181818)", borderRadius: "0 0 5px 5px", margin: "0 auto", boxShadow: "0 3px 10px rgba(0,0,0,0.5)" }} />
+
+      {/* Pescoço do suporte */}
+      <div style={{
+        width: "28px", height: "30px",
+        background: silverDark,
+        margin: "0 auto",
+        clipPath: "polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)",
+        boxShadow: "inset 1px 0 0 rgba(255,255,255,0.4)",
+      }} />
+      {/* Base oval */}
+      <div style={{
+        width: "110px", height: "10px",
+        background: silverDark,
+        borderRadius: "50%",
+        margin: "0 auto",
+        boxShadow: "0 4px 14px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.5)",
+      }} />
     </div>
   );
 }
@@ -236,7 +311,7 @@ export default function PortfolioSection({ getCldUrl }: Props) {
               className="group"
             >
               {/* Card de altura fixa */}
-              <div className="relative border border-border hover:border-accent/40 transition-colors duration-300 bg-background overflow-hidden"
+              <div className="relative bg-background overflow-hidden"
                 style={{ height: "480px" }}>
                 <Carousel images={images} title={project.title} />
               </div>
