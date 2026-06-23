@@ -207,6 +207,7 @@ export default function PortfolioSection({ getCldUrl }: Props) {
 
   return (
     <section id="portfolio" className="px-6 lg:px-16 py-20 lg:py-32 border-b border-border bg-background">
+      <div className="max-w-6xl mx-auto">
       <div className="max-w-4xl mb-12 lg:mb-20">
         <span className="text-xs font-mono text-muted uppercase tracking-[4px] mb-8 block">02 — Portfólio</span>
         <h2 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tighter leading-none mb-6">
@@ -261,6 +262,7 @@ export default function PortfolioSection({ getCldUrl }: Props) {
             </motion.div>
           );
         })}
+      </div>
       </div>
     </section>
   );

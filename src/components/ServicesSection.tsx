@@ -42,6 +42,7 @@ const services = [
 export default function ServicesSection() {
   return (
     <section id="servicos" className="px-6 lg:px-16 py-20 lg:py-32 bg-background relative border-b border-border">
+      <div className="max-w-6xl mx-auto">
       <div className="flex flex-col lg:flex-row justify-between items-end mb-12 lg:mb-20 gap-8">
         <div className="max-w-2xl">
           <span className="text-xs font-mono text-muted uppercase tracking-[4px] mb-8 block">02 — Serviços</span>
@@ -69,6 +70,7 @@ export default function ServicesSection() {
             </div>
           </div>
         ))}
+      </div>
       </div>
     </section>
   );

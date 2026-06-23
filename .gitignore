@@ -13,3 +13,5 @@ public/*.jpeg
 public/*.png
 public/*.webp
 public/*.gif
+
+.vercel

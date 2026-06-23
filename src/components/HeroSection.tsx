@@ -18,7 +18,8 @@ interface Props {
 
 export default function HeroSection({ getCldUrl }: Props) {
   return (
-    <section className="relative px-6 lg:px-16 py-20 lg:py-32 grid lg:grid-cols-[1fr_400px] gap-16 border-b border-border">
+    <section className="relative px-6 lg:px-16 py-20 lg:py-32 border-b border-border">
+      <div className="max-w-6xl mx-auto grid lg:grid-cols-[1fr_400px] gap-16">
       <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={containerVariants}>
         <motion.span variants={itemVariants} className="inline-block text-accent font-mono text-xs uppercase tracking-[4px] mb-6">
           Consultoria Estratégica Premium
@@ -66,6 +67,7 @@ export default function HeroSection({ getCldUrl }: Props) {
           </div>
         </div>
       </aside>
+      </div>
     </section>
   );
 }

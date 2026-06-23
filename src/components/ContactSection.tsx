@@ -42,6 +42,7 @@ export default function ContactSection() {
 
   return (
     <section id="diagnostico" className="px-6 lg:px-16 py-20 lg:py-32 bg-background border-b border-border">
+      <div className="max-w-6xl mx-auto">
       <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
         <div>
           <span className="text-xs font-mono text-muted uppercase tracking-[4px] mb-8 block">05 — Diagnóstico</span>
@@ -90,6 +91,7 @@ export default function ContactSection() {
           </button>
           <p className="text-[9px] text-center text-muted uppercase tracking-[1.5px] font-bold">O envio agora é automático. Entrarei em contato em até 24h.</p>
         </form>
+      </div>
       </div>
     </section>
   );

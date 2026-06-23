@@ -10,7 +10,7 @@ const painPoints = [
 export default function ExperienceSection() {
   return (
     <section id="experiencia" className="px-6 lg:px-16 py-20 lg:py-24 bg-surface/20">
-      <div className="max-w-4xl">
+      <div className="max-w-6xl mx-auto">
         <span className="text-xs font-mono text-muted uppercase tracking-[4px] mb-8 block">01 — O Contexto</span>
         <h2 className="text-3xl sm:text-4xl lg:text-6xl font-extrabold tracking-tighter leading-tight mb-12">
           Sua operação tecnológica trava na hora de escalar?

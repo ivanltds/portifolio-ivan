@@ -5,7 +5,7 @@ import { scrollToSection } from "../utils/scroll";
 export default function CtaSection() {
   return (
     <section className="px-6 lg:px-16 py-20 lg:py-32 bg-surface text-center overflow-hidden border-b border-border">
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}>
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} className="max-w-6xl mx-auto">
         <h2 className="text-4xl sm:text-6xl lg:text-[160px] font-black tracking-[-0.05em] leading-[0.75] mb-8 lg:mb-16 opacity-10 uppercase select-none">
           RESULTS OVER<br />THEORY
         </h2>

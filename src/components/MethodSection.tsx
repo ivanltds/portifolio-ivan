@@ -11,6 +11,7 @@ const steps = [
 export default function MethodSection() {
   return (
     <section id="metodo" className="px-6 lg:px-16 py-32 border-b border-border bg-surface/[0.1]">
+      <div className="max-w-6xl mx-auto">
       <div className="grid lg:grid-cols-12 gap-16">
         <div className="lg:col-span-5">
           <span className="text-xs font-mono text-muted uppercase tracking-[4px] mb-8 block">03 — O Método</span>
@@ -40,6 +41,7 @@ export default function MethodSection() {
             </div>
           ))}
         </div>
+      </div>
       </div>
     </section>
   );
