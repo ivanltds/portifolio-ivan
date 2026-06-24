@@ -1,6 +1,7 @@
 import { Redis } from "@upstash/redis";
 
 const CONTENT_KEY = "site_content";
+const FALLBACK = "https://res.cloudinary.com/dqt35bpzt/image/upload/v1782326120/portfolio/ivan/giq9xjye3qadpe1lxmm5.jpg";
 
 export default async function handler(req: any, res: any) {
   try {
@@ -19,6 +20,6 @@ export default async function handler(req: any, res: any) {
     console.error("api/og error:", e);
   }
 
-  // fallback: imagem no Cloudinary (subir manualmente se necessário)
-  return res.redirect(302, "https://portifolio-ivan.vercel.app/ivan-hero.jpg");
+  res.setHeader("Cache-Control", "public, max-age=3600, s-maxage=3600");
+  return res.redirect(302, FALLBACK);
 }
