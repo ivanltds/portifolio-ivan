@@ -41,12 +41,7 @@ export default function App() {
           <ContactSection />
           <CtaSection />
           <Footer />
-          <button
-            onClick={() => { throw new Error("Sentry test — pode remover"); }}
-            style={{ position: "fixed", bottom: 24, right: 24, zIndex: 9999, background: "red", color: "#fff", padding: "10px 20px", fontWeight: "bold", borderRadius: 4 }}
-          >
-            Test Sentry
-          </button>
+
         </div>
       </div>
       <CookieBanner />
