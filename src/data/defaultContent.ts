@@ -162,6 +162,42 @@ export const defaultContent: SiteContent = {
     ],
   },
 
+
+  testimonials: {
+    label: "07 — Clientes",
+    title: "O QUE DIZEM",
+    summary: "Resultados reais de quem confiou o projeto.",
+    items: [
+      {
+        id: "t1",
+        name: "Carlos Mendonca",
+        role: "CTO",
+        company: "Fintech X",
+        photoUrl: "",
+        text: "Ivan transformou nossa operacao de desenvolvimento. Em 3 meses passamos de entregas inconsistentes para um ciclo previsivel de 2 semanas. O time ganhou confianca e o negocio ganhou velocidade.",
+        featured: true,
+      },
+      {
+        id: "t2",
+        name: "Ana Ribeiro",
+        role: "CEO",
+        company: "SaaS B2B",
+        photoUrl: "",
+        text: "Contratramos consultores antes. Nenhum teve a profundidade tecnica e a visao de negocio do Ivan ao mesmo tempo. Ele fala a lingua do dev e do board — isso e raro.",
+        featured: true,
+      },
+      {
+        id: "t3",
+        name: "Rafael Costa",
+        role: "Head de Produto",
+        company: "E-commerce",
+        photoUrl: "",
+        text: "Nosso maior problema era o gap entre produto e engenharia. Ivan estruturou o fluxo de discovery e delivery de um jeito que hoje funciona sem ele — esse e o sinal de um bom consultor.",
+        featured: true,
+      },
+    ],
+  },
+
   cta: {
     backgroundText: "RESULTS OVER\nTHEORY",
     title: "PRONTO PARA O",

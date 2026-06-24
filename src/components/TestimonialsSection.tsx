@@ -6,6 +6,8 @@ export default function TestimonialsSection() {
   const { content } = useSiteContent();
   const tm = content.testimonials;
 
+  if (!tm?.items) return null;
+
   const featured = tm.items.filter((t) => t.featured).slice(0, 3);
   if (!featured.length) return null;
 

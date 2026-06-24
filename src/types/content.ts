@@ -150,6 +150,25 @@ export interface FooterContent {
   copyright: string;
 }
 
+
+// ─── Depoimentos ──────────────────────────────────────────────────────────────
+export interface Testimonial {
+  id: string;
+  name: string;
+  role: string;
+  company: string;
+  photoUrl: string;
+  text: string;
+  featured: boolean; // true = aparece na pagina principal (max 3)
+}
+
+export interface TestimonialsContent {
+  label: string;
+  title: string;
+  summary: string;
+  items: Testimonial[];
+}
+
 // ─── Root ─────────────────────────────────────────────────────────────────────
 export interface SiteContent {
   hero: HeroContent;
@@ -162,5 +181,6 @@ export interface SiteContent {
   faq: FaqContent;
   contact: ContactContent;
   cta: CtaContent;
+  testimonials: TestimonialsContent;
   footer: FooterContent;
 }
