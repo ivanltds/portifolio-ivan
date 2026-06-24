@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, type ReactNode } from "react";
 import { Save, Plus, Trash2, Upload, ChevronDown, ChevronUp, ToggleLeft, ToggleRight } from "lucide-react";
-import { SiteContent, ServiceCard, MethodStep, FaqItem, ContactStep, AcademicEntry, Certification, Testimonial } from "../types/content";
+import { SiteContent, ServiceCard, MethodStep, FaqItem, ContactStep, AcademicEntry, Certification, Testimonial, SeoContent } from "../types/content";
 import { defaultContent } from "../data/defaultContent";
 
 const SECTIONS = [
@@ -16,6 +16,7 @@ const SECTIONS = [
   { key: "contact",    label: "Diagnóstico" },
   { key: "cta",        label: "Próximo Nível" },
   { key: "footer",     label: "Rodapé" },
+  { key: "seo",        label: "SEO / OG Image" },
 ] as const;
 
 type SectionKey = typeof SECTIONS[number]["key"];
@@ -693,6 +694,43 @@ export default function AdminContent({ token }: Props) {
           >
             <Save size={13} /> {saving ? "Salvando..." : "Salvar seção"}
           </button>
+
+          {/* ── SEO / OG Image ── */}
+          {activeSection === "seo" && (() => {
+            const seo = content.seo;
+            const upd = (f: string, v: any) => set("seo", { [f]: v } as any);
+            return (
+              <>
+                <div className="space-y-2">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted">SEO / Open Graph</p>
+                  <p className="text-[10px] text-muted">Estas informações aparecem quando o site é compartilhado no WhatsApp, LinkedIn, etc.</p>
+                </div>
+                <Field label="Título OG (compartilhamento social)">
+                  <Input value={seo?.ogTitle || ""} onChange={(v) => upd("ogTitle", v)} placeholder="Ivan Souza | LTDS" />
+                </Field>
+                <Field label="Descrição OG">
+                  <Textarea value={seo?.ogDescription || ""} onChange={(v) => upd("ogDescription", v)} rows={2} />
+                </Field>
+                <PhotoPicker
+                  label="Imagem OG (1200×630px recomendado)"
+                  value={seo?.ogImageUrl || ""}
+                  onChange={(url) => upd("ogImageUrl", url)}
+                  token={token}
+                />
+                {seo?.ogImageUrl && (
+                  <div className="space-y-2">
+                    <p className="text-[10px] text-muted uppercase tracking-widest font-bold">Preview</p>
+                    <img src={seo.ogImageUrl} alt="OG preview" className="w-full max-w-md border border-border" />
+                  </div>
+                )}
+                <div className="border border-border p-4 space-y-1">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-accent">Como funciona</p>
+                  <p className="text-[10px] text-muted">Após salvar, a imagem fica disponível em <code className="text-accent">portifolio-ivan.vercel.app/api/og</code> e é usada automaticamente nos compartilhamentos.</p>
+                </div>
+              </>
+            );
+          })()}
+
         </div>
       </div>
     </div>

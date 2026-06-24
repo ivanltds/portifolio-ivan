@@ -216,4 +216,10 @@ export const defaultContent: SiteContent = {
     location: "Brasil — Global Delivery",
     copyright: "© 2026 Ivan Souza.",
   },
+
+  seo: {
+    ogImageUrl: "https://portifolio-ivan.vercel.app/ivan-hero.jpg",
+    ogTitle: "Ivan Souza | LTDS - Consultoria Estrategica de Tech",
+    ogDescription: "10 anos transformando complexidade tecnica em eficiencia operacional. Agile Master + Arquitetura Backend + Engenharia de IA.",
+  },
 };

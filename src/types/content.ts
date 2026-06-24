@@ -169,6 +169,13 @@ export interface TestimonialsContent {
   items: Testimonial[];
 }
 
+
+export interface SeoContent {
+  ogImageUrl: string;
+  ogTitle: string;
+  ogDescription: string;
+}
+
 // ─── Root ─────────────────────────────────────────────────────────────────────
 export interface SiteContent {
   hero: HeroContent;
@@ -183,4 +190,5 @@ export interface SiteContent {
   cta: CtaContent;
   testimonials: TestimonialsContent;
   footer: FooterContent;
+  seo: SeoContent;
 }
