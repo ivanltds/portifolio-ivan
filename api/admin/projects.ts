@@ -56,94 +56,83 @@ function normalize(p: any): Project {
   return { ...p, images: normalizeImages(images) };
 }
 
-// ─── KV helpers ───────────────────────────────────────────────────────────────
-async function readProjects(): Promise<Project[]> {
-  const data = await redis.get<Project[]>(KV_KEY);
-  return (data || []).map(normalize);
+// ─── KV helpers ─────────────────────────────────────────────────────────────
+async function getAll(): Promise<Project[]> {
+  const raw = await redis.get<any[]>(KV_KEY);
+  return (raw || []).map(normalize);
 }
 
-async function writeProjects(projects: Project[]): Promise<void> {
+async function saveAll(projects: Project[]) {
   await redis.set(KV_KEY, projects);
 }
 
-// ─── Handler ──────────────────────────────────────────────────────────────────
+// ─── Handler ─────────────────────────────────────────────────────────────────
 export default async function handler(req: any, res: any) {
-  if (!verifyToken(req)) {
-    return res.status(401).json({ error: "Não autorizado" });
+  if (!verifyToken(req)) return res.status(401).json({ error: "Nao autorizado" });
+
+  // GET — lista todos
+  if (req.method === "GET") {
+    const projects = await getAll();
+    return res.json({ projects });
   }
 
-  // Parsear body se necessário
+  // Parseia body
   let body = req.body;
-  if (typeof body === "string") {
-    try { body = JSON.parse(body); } catch { body = {}; }
+  if (!body || typeof body === "string") {
+    try { body = JSON.parse(body || "{}"); } catch { body = {}; }
   }
-  if (!body && req.method !== "GET" && req.method !== "DELETE") {
-    body = await new Promise((resolve) => {
+  if (!body || !body.title) {
+    body = await new Promise<any>((resolve) => {
       let data = "";
       req.on("data", (chunk: any) => (data += chunk));
-      req.on("end", () => {
-        try { resolve(JSON.parse(data)); } catch { resolve({}); }
-      });
+      req.on("end", () => { try { resolve(JSON.parse(data)); } catch { resolve({}); } });
     });
   }
 
-  // ID vem como query param: /api/admin/projects?id=123
-  const idFromQuery = req.query?.id as string | undefined;
-  const hasId = !!idFromQuery;
-
-  try {
-    // GET /api/admin/projects
-    if (req.method === "GET" && !hasId) {
-      const projects = await readProjects();
-      return res.status(200).json({ projects });
-    }
-
-    // POST /api/admin/projects
-    if (req.method === "POST") {
-      const projects = await readProjects();
-      const newProject: Project = {
-        id: Date.now().toString(),
-        title: body.title || "",
-        desc: body.desc || "",
-        link: body.link || "",
-        tags: Array.isArray(body.tags) ? body.tags : [],
-        images: Array.isArray(body.images) ? body.images : [],
-        frameType: body.frameType || "none",
-      };
-      projects.push(newProject);
-      await writeProjects(projects);
-      return res.status(201).json({ project: newProject });
-    }
-
-    // PUT /api/admin/projects?id=123
-    if (req.method === "PUT" && hasId) {
-      const projects = await readProjects();
-      const idx = projects.findIndex((p) => p.id === idFromQuery);
-      if (idx === -1) return res.status(404).json({ error: "Projeto não encontrado" });
-      projects[idx] = {
-        ...projects[idx],
-        title: body.title ?? projects[idx].title,
-        desc: body.desc ?? projects[idx].desc,
-        link: body.link ?? projects[idx].link,
-        tags: Array.isArray(body.tags) ? body.tags : projects[idx].tags,
-        images: Array.isArray(body.images) ? body.images : projects[idx].images,
-        frameType: body.frameType ?? projects[idx].frameType ?? "none",
-      };
-      await writeProjects(projects);
-      return res.status(200).json({ project: projects[idx] });
-    }
-
-    // DELETE /api/admin/projects?id=123
-    if (req.method === "DELETE" && hasId) {
-      const projects = await readProjects();
-      const filtered = projects.filter((p) => p.id !== idFromQuery);
-      await writeProjects(filtered);
-      return res.status(200).json({ ok: true });
-    }
-
-    return res.status(405).json({ error: "Método não permitido" });
-  } catch (err: any) {
-    console.error("[admin/projects] KV error:", err);
-    return res.status(500).json({ error: "Erro interno", detail: err.message });
+  // POST — cria
+  if (req.method === "POST") {
+    const projects = await getAll();
+    const newProject: Project = {
+      id: Date.now().toString(),
+      title: body.title || "",
+      desc: body.desc || "",
+      link: body.link || "",
+      tags: Array.isArray(body.tags) ? body.tags : (body.tags || "").split(",").map((t: string) => t.trim()).filter(Boolean),
+      images: normalizeImages(body.images || []),
+    };
+    projects.push(newProject);
+    await saveAll(projects);
+    return res.json({ project: newProject });
   }
+
+  // PUT — atualiza
+  if (req.method === "PUT") {
+    const id = req.query?.id || (req.url?.split("?id=")[1]);
+    if (!id) return res.status(400).json({ error: "ID obrigatorio" });
+    const projects = await getAll();
+    const idx = projects.findIndex((p) => p.id === id);
+    if (idx === -1) return res.status(404).json({ error: "Projeto nao encontrado" });
+    projects[idx] = {
+      ...projects[idx],
+      title: body.title ?? projects[idx].title,
+      desc: body.desc ?? projects[idx].desc,
+      link: body.link ?? projects[idx].link,
+      tags: Array.isArray(body.tags) ? body.tags : (body.tags || "").split(",").map((t: string) => t.trim()).filter(Boolean),
+      images: body.images ? normalizeImages(body.images) : projects[idx].images,
+    };
+    await saveAll(projects);
+    return res.json({ project: projects[idx] });
+  }
+
+  // DELETE
+  if (req.method === "DELETE") {
+    const id = req.query?.id || (req.url?.split("?id=")[1]);
+    if (!id) return res.status(400).json({ error: "ID obrigatorio" });
+    const projects = await getAll();
+    const filtered = projects.filter((p) => p.id !== id);
+    await saveAll(filtered);
+    return res.json({ ok: true });
+  }
+
+  return res.status(405).end();
 }

@@ -1,7 +1,6 @@
 import crypto from "crypto";
 import { v2 as cloudinary } from "cloudinary";
 
-// Vercel: aumenta limite do body para uploads
 export const config = {
   api: { bodyParser: { sizeLimit: "10mb" } },
 };
@@ -18,9 +17,8 @@ function verifyToken(req: any): boolean {
 
 export default async function handler(req: any, res: any) {
   if (req.method !== "POST") return res.status(405).end();
-  if (!verifyToken(req)) return res.status(401).json({ error: "Não autorizado" });
+  if (!verifyToken(req)) return res.status(401).json({ error: "Nao autorizado" });
 
-  // Parsear body manualmente — req.body pode vir undefined no Vercel para payloads grandes
   let body = req.body;
   if (typeof body === "string") {
     try { body = JSON.parse(body); } catch { body = {}; }
@@ -35,8 +33,8 @@ export default async function handler(req: any, res: any) {
     });
   }
 
-  const { image, filename } = body || {};
-  if (!image) return res.status(400).json({ error: "Imagem não enviada" });
+  const { image } = body || {};
+  if (!image) return res.status(400).json({ error: "Imagem nao enviada" });
 
   cloudinary.config({
     cloud_name: process.env.VITE_CLOUDINARY_CLOUD_NAME || "dqt35bpzt",
@@ -48,16 +46,13 @@ export default async function handler(req: any, res: any) {
   const folder = (process.env.VITE_CLOUDINARY_FOLDER || "portfolio/ivan").trim().replace(/\/$/, "");
 
   try {
-    // Deixa o Cloudinary gerar o public_id — evita problemas com caracteres inválidos
     const result = await cloudinary.uploader.upload(image, {
       folder,
       transformation: [{ quality: "auto", fetch_format: "auto" }],
     });
-
-    const nameWithExt = result.public_id.split("/").pop() + "." + result.format;
-    return res.json({ url: result.secure_url, filename: nameWithExt });
+    return res.json({ url: result.secure_url, public_id: result.public_id });
   } catch (err: any) {
-    console.error("[upload] Cloudinary error:", err.message);
-    return res.status(500).json({ error: "Falha no upload: " + err.message });
+    console.error("Cloudinary upload error:", err);
+    return res.status(500).json({ error: err.message || "Erro no upload" });
   }
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type FormEvent} from "react";
 import { Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 
 interface Props {
@@ -11,7 +11,7 @@ export default function AdminLogin({ onLogin }: Props) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");

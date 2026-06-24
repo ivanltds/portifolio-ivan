@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type ChangeEvent, type ReactNode } from "react";
 import { Plus, Pencil, Trash2, X, Save, LogOut, ExternalLink, Tag, ImageIcon, Smartphone, Monitor, Square } from "lucide-react";
 import AdminContent from "./AdminContent";
 
@@ -28,7 +28,7 @@ interface FormState {
 
 const EMPTY: FormState = { title: "", desc: "", link: "", tags: [], images: [] };
 
-const FRAME_ICONS: Record<FrameType, React.ReactNode> = {
+const FRAME_ICONS: Record<FrameType, ReactNode> = {
   none:    <Square size={10} />,
   phone:   <Smartphone size={10} />,
   desktop: <Monitor size={10} />,
@@ -115,7 +115,7 @@ export default function AdminDashboard({ onLogout }: Props) {
     return url;
   };
 
-  const handleFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFilesChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
     setUploading(true); setError("");
@@ -316,43 +316,35 @@ export default function AdminDashboard({ onLogout }: Props) {
 
                 <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFilesChange} />
               </div>
-
-              {/* Título */}
+              {/* Titulo */}
               <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-muted">Título *</label>
-                <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  placeholder="Nome do projeto"
-                  className="w-full bg-transparent border-b border-border py-3 focus:border-accent focus:outline-none transition-colors text-sm" />
+                <label className="text-[10px] uppercase tracking-widest font-bold text-muted">Titulo *</label>
+                <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Nome do projeto" required className="w-full bg-transparent border-b border-border py-3 focus:border-accent focus:outline-none text-sm font-light transition-colors" />
               </div>
 
-              {/* Descrição */}
+              {/* Descricao */}
               <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-muted">Descrição *</label>
-                <textarea value={form.desc} onChange={(e) => setForm({ ...form, desc: e.target.value })}
-                  placeholder="Descreva o projeto..." rows={3}
-                  className="w-full bg-transparent border border-border p-4 focus:border-accent focus:outline-none transition-colors text-sm resize-none" />
+                <label className="text-[10px] uppercase tracking-widest font-bold text-muted">Descricao *</label>
+                <textarea value={form.desc} onChange={(e) => setForm({ ...form, desc: e.target.value })} rows={3} placeholder="Descricao breve do projeto" required className="w-full bg-transparent border border-border p-3 focus:border-accent focus:outline-none text-sm font-light transition-colors resize-none" />
               </div>
 
               {/* Link */}
               <div className="space-y-2">
                 <label className="text-[10px] uppercase tracking-widest font-bold text-muted">Link *</label>
-                <input type="url" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })}
-                  placeholder="https://..."
-                  className="w-full bg-transparent border-b border-border py-3 focus:border-accent focus:outline-none transition-colors text-sm" />
+                <input type="url" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} placeholder="https://..." required className="w-full bg-transparent border-b border-border py-3 focus:border-accent focus:outline-none text-sm font-light transition-colors" />
               </div>
 
               {/* Tags */}
               <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-muted flex items-center gap-2">
-                  <Tag size={10} /> Tags <span className="opacity-50">(separadas por vírgula)</span>
-                </label>
-                <input type="text" value={tagsInput} onChange={(e) => setTagsInput(e.target.value)}
-                  placeholder="React, Node.js, Tailwind"
-                  className="w-full bg-transparent border-b border-border py-3 focus:border-accent focus:outline-none transition-colors text-sm" />
+                <label className="text-[10px] uppercase tracking-widest font-bold text-muted">Tags</label>
+                <input type="text" value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} placeholder="React, Node.js, PostgreSQL" className="w-full bg-transparent border-b border-border py-3 focus:border-accent focus:outline-none text-sm font-light transition-colors" />
+                <p className="text-[10px] text-muted">Separe por virgula</p>
                 {tagsInput && (
-                  <div className="flex gap-1 flex-wrap pt-1">
+                  <div className="flex flex-wrap gap-1 pt-1">
                     {tagsInput.split(",").map((t) => t.trim()).filter(Boolean).map((tag) => (
-                      <span key={tag} className="text-[10px] border border-accent/40 text-accent px-2 py-0.5 uppercase">{tag}</span>
+                      <span key={tag} className="flex items-center gap-1 text-[10px] border border-border px-2 py-0.5 uppercase">
+                        <Tag size={8} /> {tag}
+                      </span>
                     ))}
                   </div>
                 )}
@@ -362,13 +354,12 @@ export default function AdminDashboard({ onLogout }: Props) {
             </div>
 
             <div className="px-8 py-6 border-t border-border flex gap-3">
-              <button onClick={closePanel} className="flex-1 py-3 border border-border text-xs font-bold uppercase tracking-widest hover:border-muted transition-all">
-                Cancelar
+              <button onClick={handleSave} disabled={saving || uploading} className="flex-1 flex items-center justify-center gap-2 bg-accent text-white py-3 text-xs font-bold uppercase tracking-widest hover:bg-blue-700 disabled:opacity-50 transition-all">
+                {saving ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Save size={14} />}
+                {saving ? "Salvando..." : "Salvar"}
               </button>
-              <button onClick={handleSave}
-                disabled={saving || uploading || !form.title || !form.desc || !form.link}
-                className="flex-1 py-3 bg-accent text-white text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-blue-700 transition-all disabled:opacity-50">
-                <Save size={13} /> {saving ? "Salvando..." : "Salvar"}
+              <button onClick={closePanel} className="px-6 py-3 border border-border text-xs font-bold uppercase tracking-widest text-muted hover:text-foreground hover:border-muted transition-all">
+                Cancelar
               </button>
             </div>
           </aside>

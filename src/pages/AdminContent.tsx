@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import { Save, Plus, Trash2, Upload, ChevronDown, ChevronUp, ToggleLeft, ToggleRight } from "lucide-react";
 import { SiteContent, ServiceCard, MethodStep, FaqItem, ContactStep, AcademicEntry, Certification } from "../types/content";
 import { defaultContent } from "../data/defaultContent";
@@ -27,7 +27,7 @@ const ICON_OPTIONS = [
 interface Props { token: string; }
 
 // ─── Shared field components ──────────────────────────────────────────────────
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="space-y-2">
       <label className="text-[10px] uppercase tracking-widest font-bold text-muted block">{label}</label>
@@ -421,10 +421,11 @@ export default function AdminContent({ token }: Props) {
                   {active} cards habilitados — {validCount ? "✓ válido" : "⚠ habilite exatamente 3 ou 6"}
                 </div>
                 <div className="border-t border-border pt-6 space-y-4">
-                  {sv.cards.map((card: ServiceCard, i: number) => (
-                    <CardEditor key={card.id} card={card} index={i}
-                      onChange={(updated) => upd("cards", sv.cards.map((c: ServiceCard, j: number) => j === i ? updated : c))} />
-                  ))}
+                  {sv.cards.map((card: ServiceCard, i: number) => {
+                    const onChange = (updated: ServiceCard) => upd("cards", sv.cards.map((c: ServiceCard, j: number) => j === i ? updated : c));
+                    // @ts-ignore React 19 key prop type quirk
+                    return <CardEditor key={card.id} card={card} index={i} onChange={onChange} />;
+                  })}
                 </div>
               </>
             );

@@ -1,7 +1,8 @@
+import { type ElementType } from "react";
 import { Workflow, Database, Cpu, Settings, ShieldCheck, TrendingUp, Code, Globe, Zap, Users, Lock, BarChart3, Bot, Layers } from "lucide-react";
 import { useSiteContent } from "../context/SiteContentContext";
 
-const ICON_MAP: Record<string, React.ElementType> = {
+const ICON_MAP: Record<string, ElementType> = {
   workflow: Workflow, database: Database, cpu: Cpu, settings: Settings,
   "shield-check": ShieldCheck, "trending-up": TrendingUp, code: Code,
   globe: Globe, zap: Zap, users: Users, lock: Lock,

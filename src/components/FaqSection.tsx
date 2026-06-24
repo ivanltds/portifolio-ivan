@@ -8,8 +8,7 @@ export default function FaqSection() {
   const [showAll, setShowAll] = useState(false);
 
   const featured = fq.questions.filter((q) => q.featured).slice(0, 4);
-  const rest = fq.questions.filter((q) => !q.featured || featured.findIndex(f => f.id === q.id) < 0 || featured.length < fq.questions.filter(q => q.featured).length)
-    .filter((q) => !featured.find((f) => f.id === q.id));
+  const rest = fq.questions.filter((q) => !featured.find((f) => f.id === q.id));
 
   return (
     <section id="faq" className="px-6 lg:px-16 py-32 border-b border-border">
@@ -38,16 +37,14 @@ export default function FaqSection() {
               className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-muted hover:text-accent transition-colors mb-8"
             >
               {showAll ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-              {showAll ? "Ocultar" : `Ver todas as ${fq.questions.length} dúvidas`}
+              {showAll ? "Ocultar perguntas" : `Ver todas (${rest.length} restantes)`}
             </button>
 
             {showAll && (
-              <div className="grid md:grid-cols-2 gap-12 lg:gap-20">
+              <div className="grid md:grid-cols-2 gap-10">
                 {rest.map((item) => (
-                  <div key={item.id} className="space-y-4">
-                    <h4 className="flex items-center gap-3 text-sm font-bold uppercase tracking-widest text-accent">
-                      <CheckCircle2 size={16} /> {item.question}
-                    </h4>
+                  <div key={item.id} className="space-y-3">
+                    <h4 className="text-sm font-bold uppercase tracking-widest">{item.question}</h4>
                     <p className="text-sm text-muted leading-relaxed border-l border-border pl-6">{item.answer}</p>
                   </div>
                 ))}
