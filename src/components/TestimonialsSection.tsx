@@ -30,9 +30,9 @@ export default function TestimonialsSection() {
               transition={{ delay: i * 0.1 }}
               className="bg-surface border border-border p-8 flex flex-col gap-6 relative"
             >
-              <Quote size={24} className="text-accent opacity-40 absolute top-6 right-6" />
+              <Quote size={32} className="text-accent opacity-20 absolute top-4 right-4" />
 
-              <p className="text-sm text-muted leading-relaxed flex-1 italic">
+              <p className="text-sm text-muted leading-relaxed flex-1 italic pr-8">
                 &ldquo;{item.text}&rdquo;
               </p>
 
