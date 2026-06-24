@@ -1,11 +1,13 @@
+import { type FormEvent } from "react";
 import { ArrowRight, BarChart3 } from "lucide-react";
 import { useSiteContent } from "../context/SiteContentContext";
+import { trackLeadSubmit } from "../utils/analytics";
 
 export default function ContactSection() {
   const { content } = useSiteContent();
   const ct = content.contact;
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data = {
@@ -25,6 +27,7 @@ export default function ContactSection() {
       });
 
       if (response.ok) {
+        trackLeadSubmit(data.email as string);
         alert("Mensagem enviada com sucesso! Entrarei em contato em breve.");
         (e.target as HTMLFormElement).reset();
       } else {

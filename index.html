@@ -29,6 +29,24 @@
     <meta name="twitter:title" content="Ivan Souza | LTDS — Consultoria Estratégica de Tech" />
     <meta name="twitter:description" content="10 anos transformando complexidade técnica em eficiência operacional. Agile Master + Arquitetura Backend + Engenharia de IA." />
     <meta name="twitter:image" content="https://portifolio-ivan.vercel.app/ivan-hero.jpg" />
+
+    <!-- Google Analytics 4 — defina VITE_GA_ID no .env com seu Measurement ID -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_ID%"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      // Consent Mode v2: analytics bloqueado por padrão até o usuário aceitar
+      gtag('consent', 'default', {
+        analytics_storage: 'denied',
+        ad_storage: 'denied',
+        wait_for_update: 500
+      });
+      gtag('config', '%VITE_GA_ID%', {
+        send_page_view: true,
+        cookie_flags: 'SameSite=None;Secure'
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>

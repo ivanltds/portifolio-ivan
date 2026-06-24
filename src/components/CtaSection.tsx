@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { MessageCircle } from "lucide-react";
 import { scrollToSection } from "../utils/scroll";
 import { useSiteContent } from "../context/SiteContentContext";
+import { trackCtaClick, trackWhatsAppClick } from "../utils/analytics";
 
 export default function CtaSection() {
   const { content } = useSiteContent();
@@ -18,10 +19,10 @@ export default function CtaSection() {
           {cta.title} <span className="text-accent italic">{cta.accentPart}</span>
         </h3>
         <div className="flex flex-col sm:flex-row justify-center gap-6">
-          <button onClick={() => scrollToSection("diagnostico")} className="bg-accent text-white px-12 py-6 text-sm font-bold uppercase tracking-widest shadow-xl shadow-accent/40 hover:scale-105 transition-all">
+          <button onClick={() => { trackCtaClick("cta_section"); scrollToSection("diagnostico"); }} className="bg-accent text-white px-12 py-6 text-sm font-bold uppercase tracking-widest shadow-xl shadow-accent/40 hover:scale-105 transition-all">
             {cta.ctaPrimary}
           </button>
-          <a href={`https://wa.me/${footer.whatsappNumber}`} target="_blank" rel="noreferrer" className="border border-border hover:border-muted px-12 py-6 text-sm font-bold uppercase tracking-widest transition-all inline-flex items-center justify-center gap-3 group">
+          <a href={`https://wa.me/${footer.whatsappNumber}`} target="_blank" rel="noreferrer" onClick={() => trackWhatsAppClick("cta_section")} className="border border-border hover:border-muted px-12 py-6 text-sm font-bold uppercase tracking-widest transition-all inline-flex items-center justify-center gap-3 group">
             <MessageCircle size={18} className="group-hover:text-accent transition-colors" /> {cta.ctaWhatsApp}
           </a>
         </div>

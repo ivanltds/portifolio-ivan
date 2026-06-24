@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { ArrowRight, MessageCircle } from "lucide-react";
 import { scrollToSection } from "../utils/scroll";
 import { useSiteContent } from "../context/SiteContentContext";
+import { trackCtaClick, trackWhatsAppClick } from "../utils/analytics";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -47,7 +48,7 @@ export default function HeroSection({ getCldUrl }: Props) {
           </motion.p>
           <motion.div variants={itemVariants} className="flex flex-wrap gap-4">
             <button
-              onClick={() => scrollToSection("diagnostico")}
+              onClick={() => { trackCtaClick("hero"); scrollToSection("diagnostico"); }}
               className="bg-accent text-white px-8 py-5 text-sm font-bold uppercase tracking-widest flex items-center gap-3 hover:scale-105 transition-transform active:scale-95 shadow-lg shadow-accent/20"
             >
               {h.ctaPrimary} <ArrowRight size={18} />
@@ -56,6 +57,7 @@ export default function HeroSection({ getCldUrl }: Props) {
               href={`https://wa.me/${footer.whatsappNumber}`}
               target="_blank"
               rel="noreferrer"
+              onClick={() => trackWhatsAppClick("hero")}
               className="border border-border hover:border-muted px-8 py-5 text-sm font-bold uppercase tracking-widest transition-all flex items-center gap-3"
             >
               <MessageCircle size={18} /> WhatsApp

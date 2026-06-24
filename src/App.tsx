@@ -5,6 +5,8 @@
 
 import { useCloudinaryImages } from "./hooks/useCloudinaryImages";
 import { SiteContentProvider } from "./context/SiteContentContext";
+import CookieBanner from "./components/CookieBanner";
+import { Analytics } from "@vercel/analytics/react";
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
 import HeroSection from "./components/HeroSection";
@@ -39,6 +41,8 @@ export default function App() {
           <Footer />
         </div>
       </div>
+      <CookieBanner />
+      <Analytics />
     </SiteContentProvider>
   );
 }

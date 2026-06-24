@@ -4,6 +4,10 @@ import "./index.css";
 import App from "./App.tsx";
 import AdminLogin from "./pages/AdminLogin.tsx";
 import AdminDashboard from "./pages/AdminDashboard.tsx";
+import { restoreConsent } from "./components/CookieBanner";
+
+// Restaura o consentimento de cookies salvo antes de qualquer evento GA4
+restoreConsent();
 
 function Root() {
   const isAdmin = window.location.pathname.startsWith("/admin");
