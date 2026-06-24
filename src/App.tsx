@@ -4,6 +4,7 @@
  */
 
 import { useCloudinaryImages } from "./hooks/useCloudinaryImages";
+import { SiteContentProvider } from "./context/SiteContentContext";
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
 import HeroSection from "./components/HeroSection";
@@ -21,21 +22,23 @@ export default function App() {
   const { getCldUrl } = useCloudinaryImages();
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-accent selection:text-white overflow-x-hidden">
-      <Sidebar />
-      <div className="lg:pl-20">
-        <Navbar />
-        <HeroSection getCldUrl={getCldUrl} />
-        <AboutSection getCldUrl={getCldUrl} />
-        <ExperienceSection />
-        <PortfolioSection getCldUrl={getCldUrl} />
-        <ServicesSection />
-        <MethodSection />
-        <FaqSection />
-        <ContactSection />
-        <CtaSection />
-        <Footer />
+    <SiteContentProvider>
+      <div className="min-h-screen bg-background text-foreground font-sans selection:bg-accent selection:text-white overflow-x-hidden">
+        <Sidebar />
+        <div className="lg:pl-20">
+          <Navbar />
+          <HeroSection getCldUrl={getCldUrl} />
+          <AboutSection getCldUrl={getCldUrl} />
+          <ExperienceSection />
+          <PortfolioSection getCldUrl={getCldUrl} />
+          <ServicesSection />
+          <MethodSection />
+          <FaqSection />
+          <ContactSection />
+          <CtaSection />
+          <Footer />
+        </div>
       </div>
-    </div>
+    </SiteContentProvider>
   );
 }

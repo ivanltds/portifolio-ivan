@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Plus, Pencil, Trash2, X, Save, LogOut, ExternalLink, Tag, ImageIcon, Smartphone, Monitor, Square } from "lucide-react";
+import AdminContent from "./AdminContent";
 
 type FrameType = "none" | "phone" | "desktop";
 
@@ -47,6 +48,7 @@ function getImages(p: Project): FormImage[] {
 interface Props { onLogout: () => void; }
 
 export default function AdminDashboard({ onLogout }: Props) {
+  const [tab, setTab] = useState<"projetos" | "conteudo">("projetos");
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Project | null>(null);
@@ -160,13 +162,24 @@ export default function AdminDashboard({ onLogout }: Props) {
         <div className="flex items-center gap-4">
           <a href="/" className="font-extrabold text-xl tracking-tighter text-accent">IS.</a>
           <span className="text-[10px] text-muted uppercase tracking-[4px] hidden sm:block">Admin Panel</span>
+          <div className="flex gap-1 ml-4">
+            {(["projetos", "conteudo"] as const).map((t) => (
+              <button key={t} onClick={() => setTab(t)}
+                className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-all border
+                  ${tab === t ? "bg-accent text-white border-accent" : "border-border text-muted hover:text-foreground"}`}>
+                {t === "projetos" ? "Portfólio" : "Conteúdo"}
+              </button>
+            ))}
+          </div>
         </div>
         <button onClick={onLogout} className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted hover:text-accent transition-colors">
           <LogOut size={14} /> Sair
         </button>
       </header>
 
-      <div className="max-w-5xl mx-auto px-6 lg:px-12 py-12">
+      {tab === "conteudo" && <AdminContent token={token} />}
+
+      {tab === "projetos" && <div className="max-w-5xl mx-auto px-6 lg:px-12 py-12">
         <div className="flex items-end justify-between mb-10">
           <div>
             <span className="text-xs font-mono text-muted uppercase tracking-[4px] block mb-2">Portfólio</span>
@@ -233,7 +246,7 @@ export default function AdminDashboard({ onLogout }: Props) {
             )}
           </div>
         )}
-      </div>
+      </div>}
 
       {panelOpen && (
         <>

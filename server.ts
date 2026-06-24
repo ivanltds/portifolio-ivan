@@ -6,8 +6,10 @@ import dotenv from "dotenv";
 import contactHandler from "./api/contact";
 import imagesHandler from "./api/images";
 import projectsHandler from "./api/projects";
+import contentHandler from "./api/content";
 import loginHandler from "./api/admin/login";
 import adminProjectsHandler from "./api/admin/projects";
+import adminContentHandler from "./api/admin/content";
 import uploadHandler from "./api/admin/upload";
 
 dotenv.config();
@@ -25,6 +27,7 @@ async function startServer() {
   app.post("/api/contact", contactHandler);
   app.get("/api/images", imagesHandler);
   app.get("/api/projects", projectsHandler);
+  app.get("/api/content", contentHandler);
 
   // Admin API
   app.post("/api/admin/login", loginHandler);
@@ -32,6 +35,8 @@ async function startServer() {
   app.post("/api/admin/projects", adminProjectsHandler);
   app.put("/api/admin/projects", adminProjectsHandler);
   app.delete("/api/admin/projects", adminProjectsHandler);
+  app.get("/api/admin/content", adminContentHandler);
+  app.put("/api/admin/content", adminContentHandler);
   app.post("/api/admin/upload", uploadHandler);
 
   // Vite middleware

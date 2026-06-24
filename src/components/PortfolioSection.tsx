@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "motion/react";
 import { ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
+import { useSiteContent } from "../context/SiteContentContext";
 
 type FrameType = "none" | "phone" | "desktop";
 
@@ -190,6 +191,8 @@ function Carousel({ images, title }: { images: ProjectImage[]; title: string }) 
 interface Props { getCldUrl: (name: string) => string; }
 
 export default function PortfolioSection({ getCldUrl }: Props) {
+  const { content } = useSiteContent();
+  const pf = content.portfolio;
   const [projects, setProjects] = useState<Project[]>(FALLBACK);
 
   useEffect(() => {
@@ -203,13 +206,11 @@ export default function PortfolioSection({ getCldUrl }: Props) {
     <section id="portfolio" className="px-6 lg:px-16 py-20 lg:py-32 border-b border-border bg-background">
       <div className="max-w-6xl mx-auto">
       <div className="max-w-4xl mb-12 lg:mb-20">
-        <span className="text-xs font-mono text-muted uppercase tracking-[4px] mb-8 block">02 — Portfólio</span>
+        <span className="text-xs font-mono text-muted uppercase tracking-[4px] mb-8 block">{pf.label}</span>
         <h2 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tighter leading-none mb-6">
-          Aplicações em <span className="text-accent italic">produção.</span>
+          {pf.title}
         </h2>
-        <p className="text-lg lg:text-xl text-muted font-light">
-          Projetos reais que resolvem problemas reais. Da estratégia de entrega ao código final.
-        </p>
+        <p className="text-lg lg:text-xl text-muted font-light">{pf.summary}</p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-12">
