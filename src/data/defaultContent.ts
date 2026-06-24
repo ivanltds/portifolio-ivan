@@ -41,14 +41,14 @@ export const defaultContent: SiteContent = {
     ],
     specializations: ["UX/UI Design — PUC", "Gestão de Projetos — USP"],
     certifications: [
-      { id: "1", name: "PSM I", issuer: "Scrum.org", imageUrl: "badge-psm.png" },
-      { id: "2", name: "PSPO I", issuer: "Scrum.org", imageUrl: "badge-pspo.png" },
-      { id: "3", name: "OKR Foundation", issuer: "CertiProf", imageUrl: "badge-okr.png" },
+      { id: "1", name: "PSM I", issuer: "Scrum.org", imageUrl: "badge-psm.jpg" },
+      { id: "2", name: "PSPO I", issuer: "Scrum.org", imageUrl: "badge-pspo.jpg" },
+      { id: "3", name: "OKR Foundation", issuer: "CertiProf", imageUrl: "badge-okr.jpg" },
       {
         id: "4",
         name: "Análise e Desenv. de Sistemas",
         issuer: "Mackenzie",
-        imageUrl: "badge-mackenzie.png",
+        imageUrl: "badge-mackenzie.jpg",
       },
     ],
   },
