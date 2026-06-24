@@ -1,20 +1,73 @@
-import { type FormEvent } from "react";
+import { useEffect, useRef, type FormEvent } from "react";
 import { ArrowRight, BarChart3 } from "lucide-react";
 import { useSiteContent } from "../context/SiteContentContext";
 import { trackLeadSubmit } from "../utils/analytics";
 
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (el: string | HTMLElement, opts: Record<string, unknown>) => string;
+      reset: (widgetId: string) => void;
+      remove: (widgetId: string) => void;
+    };
+  }
+}
+
+const SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined;
+
 export default function ContactSection() {
   const { content } = useSiteContent();
   const ct = content.contact;
+  const widgetRef = useRef<HTMLDivElement>(null);
+  const widgetId = useRef<string | null>(null);
+  const tokenRef = useRef<string>("");
+
+  useEffect(() => {
+    if (!SITE_KEY || !widgetRef.current) return;
+
+    const render = () => {
+      if (!window.turnstile || !widgetRef.current || widgetId.current) return;
+      widgetId.current = window.turnstile.render(widgetRef.current, {
+        sitekey: SITE_KEY,
+        theme: "dark",
+        size: "normal",
+        callback: (token: string) => { tokenRef.current = token; },
+        "expired-callback": () => { tokenRef.current = ""; },
+        "error-callback": () => { tokenRef.current = ""; },
+      });
+    };
+
+    // Tenta renderizar imediatamente ou aguarda o script carregar
+    if (window.turnstile) {
+      render();
+    } else {
+      const interval = setInterval(() => {
+        if (window.turnstile) { render(); clearInterval(interval); }
+      }, 200);
+      return () => clearInterval(interval);
+    }
+
+    return () => {
+      if (widgetId.current && window.turnstile) {
+        window.turnstile.remove(widgetId.current);
+        widgetId.current = null;
+      }
+    };
+  }, []);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data = {
-      nome: formData.get("nome"),
-      email: formData.get("email"),
-      desafio: formData.get("desafio"),
+      nome: formData.get("nome") as string,
+      email: formData.get("email") as string,
+      desafio: formData.get("desafio") as string,
     };
+
+    if (SITE_KEY && !tokenRef.current) {
+      alert("Complete a verificacao de seguranca antes de enviar.");
+      return;
+    }
 
     const btn = e.currentTarget.querySelector('button[type="submit"]') as HTMLButtonElement;
     if (btn) btn.disabled = true;
@@ -23,19 +76,21 @@ export default function ContactSection() {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, _to: ct.contactEmail }),
+        body: JSON.stringify({ ...data, _to: ct.contactEmail, _turnstile: tokenRef.current }),
       });
 
       if (response.ok) {
-        trackLeadSubmit(data.email as string);
+        trackLeadSubmit(data.email);
         alert("Mensagem enviada com sucesso! Entrarei em contato em breve.");
         (e.target as HTMLFormElement).reset();
+        tokenRef.current = "";
+        if (widgetId.current && window.turnstile) window.turnstile.reset(widgetId.current);
       } else {
         const err = await response.json();
         alert(`Erro: ${err.error || "Falha ao enviar"}`);
       }
     } catch {
-      alert("Erro de conexão. Verifique sua internet.");
+      alert("Erro de conexao. Verifique sua internet.");
     } finally {
       if (btn) btn.disabled = false;
     }
@@ -81,9 +136,13 @@ export default function ContactSection() {
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] uppercase tracking-widest font-bold text-muted">Qual o maior desafio técnico/operacional hoje?</label>
-              <textarea name="desafio" placeholder="Ex: Atrasos constantes, bugs críticos em produção, falta de escala na infra..." rows={4} required className="w-full bg-transparent border border-border p-6 focus:border-accent focus:outline-none transition-colors text-sm font-light resize-none" />
+              <label className="text-[10px] uppercase tracking-widest font-bold text-muted">Qual o maior desafio tecnico/operacional hoje?</label>
+              <textarea name="desafio" placeholder="Ex: Atrasos constantes, bugs criticos em producao, falta de escala na infra..." rows={4} required className="w-full bg-transparent border border-border p-6 focus:border-accent focus:outline-none transition-colors text-sm font-light resize-none" />
             </div>
+
+            {/* Turnstile widget — invisivel quando possivel */}
+            {SITE_KEY && <div ref={widgetRef} className="flex justify-start" />}
+
             <button type="submit" className="w-full bg-accent text-white py-6 font-bold text-xs uppercase tracking-[2px] transition-all flex items-center justify-center gap-3 hover:bg-blue-700 shadow-xl shadow-accent/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
               {ct.ctaText}
               <ArrowRight size={16} />
