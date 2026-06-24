@@ -16,6 +16,7 @@ import PortfolioSection from "./components/PortfolioSection";
 import ServicesSection from "./components/ServicesSection";
 import MethodSection from "./components/MethodSection";
 import FaqSection from "./components/FaqSection";
+import TestimonialsSection from "./components/TestimonialsSection";
 import ContactSection from "./components/ContactSection";
 import CtaSection from "./components/CtaSection";
 import Footer from "./components/Footer";
@@ -36,6 +37,7 @@ export default function App() {
           <ServicesSection />
           <MethodSection />
           <FaqSection />
+          <TestimonialsSection />
           <ContactSection />
           <CtaSection />
           <Footer />

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, type ReactNode } from "react";
 import { Save, Plus, Trash2, Upload, ChevronDown, ChevronUp, ToggleLeft, ToggleRight } from "lucide-react";
-import { SiteContent, ServiceCard, MethodStep, FaqItem, ContactStep, AcademicEntry, Certification } from "../types/content";
+import { SiteContent, ServiceCard, MethodStep, FaqItem, ContactStep, AcademicEntry, Certification, Testimonial } from "../types/content";
 import { defaultContent } from "../data/defaultContent";
 
 const SECTIONS = [
@@ -12,6 +12,7 @@ const SECTIONS = [
   { key: "services",   label: "Serviços" },
   { key: "method",     label: "O Método" },
   { key: "faq",        label: "FAQ" },
+  { key: "testimonials", label: "Depoimentos" },
   { key: "contact",    label: "Diagnóstico" },
   { key: "cta",        label: "Próximo Nível" },
   { key: "footer",     label: "Rodapé" },
@@ -508,6 +509,73 @@ export default function AdminContent({ token }: Props) {
                       </div>
                       <Input value={item.question} onChange={(v) => upd("questions", fq.questions.map((q: FaqItem, j: number) => j === i ? { ...q, question: v } : q))} placeholder="Pergunta..." />
                       <Textarea value={item.answer} onChange={(v) => upd("questions", fq.questions.map((q: FaqItem, j: number) => j === i ? { ...q, answer: v } : q))} rows={3} placeholder="Resposta..." />
+                    </div>
+                  ))}
+                </div>
+              </>
+            );
+          })()}
+
+
+          {/* ── Depoimentos ── */}
+          {activeSection === "testimonials" && (() => {
+            const tm = content.testimonials;
+            const upd = (f: string, v: any) => set("testimonials", { [f]: v } as any);
+            const featuredCount = tm.items.filter((t: Testimonial) => t.featured).length;
+            return (
+              <>
+                <SectionHeader label={tm.label} title={tm.title} summary={tm.summary} onChange={(f, v) => upd(f, v)} />
+                <p className="text-[10px] text-muted uppercase tracking-widest">
+                  {featuredCount} em destaque (máx 3) — {tm.items.length} total
+                </p>
+                <div className="border-t border-border pt-6 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Depoimentos</p>
+                    <button onClick={() => upd("items", [...tm.items, {
+                      id: Date.now().toString(),
+                      name: "", role: "", company: "", text: "", photoUrl: "", featured: featuredCount < 3
+                    }])}
+                      className="text-[10px] font-bold text-accent flex items-center gap-1 hover:opacity-70">
+                      <Plus size={10} /> Adicionar
+                    </button>
+                  </div>
+                  {tm.items.map((item: Testimonial, i: number) => (
+                    <div key={item.id} className={`border p-4 space-y-3 ${item.featured ? "border-accent/40" : "border-border"}`}>
+                      <div className="flex justify-between items-center">
+                        <button
+                          onClick={() => {
+                            const newFeatured = !item.featured;
+                            if (newFeatured && featuredCount >= 3) { alert("Máximo 3 em destaque."); return; }
+                            upd("items", tm.items.map((t: Testimonial, j: number) => j === i ? { ...t, featured: newFeatured } : t));
+                          }}
+                          className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest ${item.featured ? "text-accent" : "text-muted"}`}
+                        >
+                          {item.featured ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                          {item.featured ? "Destaque" : "Oculto"}
+                        </button>
+                        <button onClick={() => upd("items", tm.items.filter((_: any, j: number) => j !== i))}
+                          className="text-red-500 hover:opacity-70"><Trash2 size={12} /></button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <Field label="Nome">
+                          <Input value={item.name} onChange={(v) => upd("items", tm.items.map((t: Testimonial, j: number) => j === i ? { ...t, name: v } : t))} placeholder="Carlos Silva" />
+                        </Field>
+                        <Field label="Cargo">
+                          <Input value={item.role} onChange={(v) => upd("items", tm.items.map((t: Testimonial, j: number) => j === i ? { ...t, role: v } : t))} placeholder="CTO" />
+                        </Field>
+                      </div>
+                      <Field label="Empresa">
+                        <Input value={item.company} onChange={(v) => upd("items", tm.items.map((t: Testimonial, j: number) => j === i ? { ...t, company: v } : t))} placeholder="Empresa X" />
+                      </Field>
+                      <Field label="Depoimento">
+                        <Textarea value={item.text} onChange={(v) => upd("items", tm.items.map((t: Testimonial, j: number) => j === i ? { ...t, text: v } : t))} rows={3} placeholder="O que disse sobre o Ivan..." />
+                      </Field>
+                      <PhotoPicker
+                        label="Foto (avatar)"
+                        value={item.photoUrl}
+                        onChange={(url) => upd("items", tm.items.map((t: Testimonial, j: number) => j === i ? { ...t, photoUrl: url } : t))}
+                        token={token}
+                      />
                     </div>
                   ))}
                 </div>
