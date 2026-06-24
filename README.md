@@ -13,7 +13,9 @@ Site de portfólio e consultoria da **LTDS**, com painel admin completo para ges
 - **Banco de dados:** Upstash Redis
 - **Imagens:** Cloudinary
 - **E-mail:** Resend
-- **Analytics:** Google Analytics 4 (Consent Mode v2) + Vercel Analytics
+- **Analytics:** Google Analytics 4 (Consent Mode v2) + Vercel Analytics + Microsoft Clarity
+- **Monitoramento:** Sentry
+- **Anti-spam:** Cloudflare Turnstile
 - **Deploy:** Vercel
 
 ---
@@ -22,7 +24,7 @@ Site de portfólio e consultoria da **LTDS**, com painel admin completo para ges
 
 ```
 ├── api/                        # Serverless functions (Vercel) / rotas Express (dev)
-│   ├── contact.ts              # Envio de e-mail via Resend
+│   ├── contact.ts              # Envio de e-mail via Resend + validação Turnstile
 │   ├── content.ts              # Conteúdo público do site (Redis)
 │   ├── images.ts               # Listagem de imagens Cloudinary
 │   ├── projects.ts             # Projetos públicos (Redis)
@@ -32,9 +34,12 @@ Site de portfólio e consultoria da **LTDS**, com painel admin completo para ges
 │       ├── projects.ts         # CRUD projetos (autenticado)
 │       └── upload.ts           # Upload de imagens para Cloudinary
 ├── public/                     # Assets estáticos (favicon, imagens)
+│   ├── robots.txt
+│   └── sitemap.xml
 ├── src/
 │   ├── components/             # Seções da página pública
 │   │   ├── Navbar.tsx
+│   │   ├── Sidebar.tsx
 │   │   ├── HeroSection.tsx
 │   │   ├── AboutSection.tsx
 │   │   ├── ExperienceSection.tsx
@@ -42,27 +47,27 @@ Site de portfólio e consultoria da **LTDS**, com painel admin completo para ges
 │   │   ├── ServicesSection.tsx
 │   │   ├── MethodSection.tsx
 │   │   ├── FaqSection.tsx
-│   │   ├── ContactSection.tsx
+│   │   ├── TestimonialsSection.tsx  # Depoimentos com cards (máx 3 em destaque)
+│   │   ├── ContactSection.tsx       # Formulário com Turnstile anti-spam
 │   │   ├── CtaSection.tsx
 │   │   ├── Footer.tsx
-│   │   ├── Sidebar.tsx
-│   │   ├── CookieBanner.tsx    # Consentimento LGPD
-│   │   └── PrivacyModal.tsx    # Política de privacidade
+│   │   ├── CookieBanner.tsx         # Consentimento LGPD
+│   │   └── PrivacyModal.tsx         # Política de privacidade
 │   ├── context/
-│   │   └── SiteContentContext.tsx  # Contexto global de conteúdo (Redis + defaults)
+│   │   └── SiteContentContext.tsx   # Contexto global (Redis + defaults com deep merge)
 │   ├── data/
-│   │   └── defaultContent.ts   # Valores padrão de todo o conteúdo do site
+│   │   └── defaultContent.ts        # Valores padrão de todo o conteúdo do site
 │   ├── pages/
 │   │   ├── AdminLogin.tsx
-│   │   ├── AdminDashboard.tsx  # Painel com abas: Portfólio e Conteúdo
-│   │   └── AdminContent.tsx    # CMS com 11 seções editáveis
+│   │   ├── AdminDashboard.tsx       # Painel com abas: Portfólio e Conteúdo
+│   │   └── AdminContent.tsx         # CMS com 12 seções editáveis
 │   ├── types/
-│   │   └── content.ts          # Interfaces TypeScript do modelo de conteúdo
+│   │   └── content.ts               # Interfaces TypeScript do modelo de conteúdo
 │   └── utils/
-│       ├── analytics.ts        # GA4 + Vercel Analytics (eventos de lead)
-│       └── scroll.ts           # Scroll suave entre seções
-├── server.ts                   # Servidor Express para desenvolvimento local
-└── index.html                  # SEO, OG tags, GA4 Consent Mode
+│       ├── analytics.ts             # GA4 + Vercel Analytics (eventos de lead)
+│       └── scroll.ts                # Scroll suave entre seções
+├── server.ts                        # Servidor Express para desenvolvimento local
+└── index.html                       # SEO, OG tags, GA4 Consent Mode v2, Clarity, LinkedIn
 ```
 
 ---
@@ -87,6 +92,10 @@ Crie um `.env.local` com:
 ```env
 # Google Analytics 4
 VITE_GA_ID=G-XXXXXXXXXX
+
+# Cloudflare Turnstile
+VITE_TURNSTILE_SITE_KEY=0x4AAAAAAAxxxxxxxxxxx
+TURNSTILE_SECRET_KEY=0x4AAAAAAAxxxxxxxxxxx
 
 # Upstash Redis
 KV_REST_API_URL=https://your-url.upstash.io
@@ -117,7 +126,7 @@ Acesse `/admin` com a senha definida em `ADMIN_PASSWORD`.
 - CRUD de projetos com upload de múltiplas fotos
 - Moldura por foto: `phone` / `desktop` / `none`
 
-**Aba Conteúdo** — CMS com 11 seções editáveis:
+**Aba Conteúdo** — CMS com 12 seções editáveis:
 
 | Seção | O que é editável |
 |---|---|
@@ -129,15 +138,16 @@ Acesse `/admin` com a senha definida em `ADMIN_PASSWORD`.
 | Serviços | 8 slots com toggle (exige exatamente 3 ou 6 habilitados) |
 | O Método | Texto + até 4 passos |
 | FAQ | Perguntas com toggle "featured" (máx. 4 em destaque) |
+| Depoimentos | Cards com nome, cargo, empresa, texto e foto; toggle "featured" (máx. 3) |
 | Diagnóstico | Texto, passos, e-mail de destino, CTA |
 | Próximo Nível | Texto de fundo, título, destaque, CTAs |
 | Rodapé | Nome, tagline, e-mail, telefone, WhatsApp, LinkedIn, localização |
 
 ---
 
-## Analytics
+## Analytics & Monitoramento
 
-Eventos rastreados via GA4 e Vercel Analytics:
+### Eventos rastreados (GA4 + Vercel Analytics)
 
 | Evento | Gatilho |
 |---|---|
@@ -146,7 +156,36 @@ Eventos rastreados via GA4 e Vercel Analytics:
 | `whatsapp_click` | Links WhatsApp (Hero, CTA, Footer) |
 | `project_view` | Clique em "ver projeto" no portfólio |
 
-O GA4 usa **Consent Mode v2** — analytics bloqueado até o usuário aceitar os cookies.
+### Ferramentas integradas
+
+| Ferramenta | Função | Plano |
+|---|---|---|
+| Google Analytics 4 | Métricas + conversões | Gratuito |
+| Vercel Analytics | Performance + Web Vitals | Gratuito |
+| Microsoft Clarity | Heatmaps + gravação de sessões | Gratuito |
+| LinkedIn Insight Tag | Audiência B2B + remarketing | Gratuito |
+| Sentry | Monitoramento de erros em produção | Gratuito |
+
+O GA4 usa **Consent Mode v2** — analytics bloqueado até o usuário aceitar os cookies via banner LGPD.
+
+---
+
+## SEO
+
+- `public/sitemap.xml` — 5 URLs (homepage + seções âncora)
+- `public/robots.txt` — indexação permitida + ponteiro pro sitemap
+- Schema.org JSON-LD (`@graph`) com `Person` + `ProfessionalService`
+- Open Graph + Twitter Card em `index.html`
+- Canonical URL configurada
+
+---
+
+## Anti-spam
+
+Formulário de contato protegido por **Cloudflare Turnstile** (challenge invisível):
+- Widget renderizado client-side via `useEffect`
+- Token validado server-side em `api/contact.ts` antes de enviar o e-mail
+- Fallback: sem chave configurada, validação é ignorada (dev local)
 
 ---
 
