@@ -660,40 +660,6 @@ export default function AdminContent({ token }: Props) {
             );
           })()}
 
-          {/* ── Rodapé ── */}
-          {activeSection === "footer" && (() => {
-            const ft = content.footer;
-            const upd = (f: string, v: string) => set("footer", { [f]: v } as any);
-            return (
-              <>
-                <Field label="Nome"><Input value={ft.name} onChange={(v) => upd("name", v)} /></Field>
-                <Field label="Tagline"><Textarea value={ft.tagline} onChange={(v) => upd("tagline", v)} rows={2} /></Field>
-                <Field label="E-mail">
-                  <input type="email" value={ft.email} onChange={(e) => upd("email", e.target.value)}
-                    className="w-full bg-transparent border-b border-border py-3 focus:border-accent focus:outline-none text-sm" />
-                </Field>
-                <Field label="Telefone (exibição)"><Input value={ft.phone} onChange={(v) => upd("phone", v)} placeholder="+55 75 99872-3992" /></Field>
-                <Field label="WhatsApp (número com DDD, sem +)"><Input value={ft.whatsappNumber} onChange={(v) => upd("whatsappNumber", v)} placeholder="5575998723992" /></Field>
-                <Field label="URL LinkedIn"><Input value={ft.linkedinUrl} onChange={(v) => upd("linkedinUrl", v)} /></Field>
-                <Field label="Localização"><Input value={ft.location} onChange={(v) => upd("location", v)} placeholder="Brasil — Global Delivery" /></Field>
-                <Field label="Copyright"><Input value={ft.copyright} onChange={(v) => upd("copyright", v)} /></Field>
-              </>
-            );
-          })()}
-
-        </div>
-
-        {/* Footer do editor */}
-        <div className="sticky bottom-0 px-8 py-4 border-t border-border bg-background flex items-center gap-4">
-          {error && <p className="text-xs text-red-500 font-bold uppercase">{error}</p>}
-          {saved && <p className="text-xs text-green-500 font-bold uppercase tracking-widest">✓ Salvo</p>}
-          <button
-            onClick={saveSection}
-            disabled={saving}
-            className="ml-auto flex items-center gap-2 bg-accent text-white px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-blue-700 transition-all disabled:opacity-50"
-          >
-            <Save size={13} /> {saving ? "Salvando..." : "Salvar seção"}
-          </button>
 
           {/* ── SEO / OG Image ── */}
           {activeSection === "seo" && (() => {
@@ -730,6 +696,41 @@ export default function AdminContent({ token }: Props) {
               </>
             );
           })()}
+
+          {/* ── Rodapé ── */}
+          {activeSection === "footer" && (() => {
+            const ft = content.footer;
+            const upd = (f: string, v: string) => set("footer", { [f]: v } as any);
+            return (
+              <>
+                <Field label="Nome"><Input value={ft.name} onChange={(v) => upd("name", v)} /></Field>
+                <Field label="Tagline"><Textarea value={ft.tagline} onChange={(v) => upd("tagline", v)} rows={2} /></Field>
+                <Field label="E-mail">
+                  <input type="email" value={ft.email} onChange={(e) => upd("email", e.target.value)}
+                    className="w-full bg-transparent border-b border-border py-3 focus:border-accent focus:outline-none text-sm" />
+                </Field>
+                <Field label="Telefone (exibição)"><Input value={ft.phone} onChange={(v) => upd("phone", v)} placeholder="+55 75 99872-3992" /></Field>
+                <Field label="WhatsApp (número com DDD, sem +)"><Input value={ft.whatsappNumber} onChange={(v) => upd("whatsappNumber", v)} placeholder="5575998723992" /></Field>
+                <Field label="URL LinkedIn"><Input value={ft.linkedinUrl} onChange={(v) => upd("linkedinUrl", v)} /></Field>
+                <Field label="Localização"><Input value={ft.location} onChange={(v) => upd("location", v)} placeholder="Brasil — Global Delivery" /></Field>
+                <Field label="Copyright"><Input value={ft.copyright} onChange={(v) => upd("copyright", v)} /></Field>
+              </>
+            );
+          })()}
+
+        </div>
+
+        {/* Footer do editor */}
+        <div className="sticky bottom-0 px-8 py-4 border-t border-border bg-background flex items-center gap-4">
+          {error && <p className="text-xs text-red-500 font-bold uppercase">{error}</p>}
+          {saved && <p className="text-xs text-green-500 font-bold uppercase tracking-widest">✓ Salvo</p>}
+          <button
+            onClick={saveSection}
+            disabled={saving}
+            className="ml-auto flex items-center gap-2 bg-accent text-white px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-blue-700 transition-all disabled:opacity-50"
+          >
+            <Save size={13} /> {saving ? "Salvando..." : "Salvar seção"}
+          </button>
 
         </div>
       </div>
