@@ -126,10 +126,22 @@ export default function PortfolioSection({ getCldUrl }: { getCldUrl: (n: string)
                 transition={{ delay: i * 0.1 }}
                 className="border border-border bg-background group"
               >
-                <Carousel images={imgs} title={project.title} />
+                {project.caseStudy ? (
+                  <a href={`/projeto/${project.slug || project.title.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}`} className="block">
+                    <Carousel images={imgs} title={project.title} />
+                  </a>
+                ) : (
+                  <Carousel images={imgs} title={project.title} />
+                )}
                 <div className="p-6 space-y-4">
                   <div className="flex items-start justify-between gap-4">
-                    <h3 className="font-extrabold text-lg tracking-tight leading-tight">{project.title}</h3>
+                    {project.caseStudy ? (
+                      <a href={`/projeto/${project.slug || project.title.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}`} className="font-extrabold text-lg tracking-tight leading-tight hover:text-accent transition-colors">
+                        {project.title}
+                      </a>
+                    ) : (
+                      <h3 className="font-extrabold text-lg tracking-tight leading-tight">{project.title}</h3>
+                    )}
                     <a
                       href={project.link}
                       target="_blank"
