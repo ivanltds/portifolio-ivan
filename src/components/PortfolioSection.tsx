@@ -6,9 +6,14 @@ import { trackProjectView } from "../utils/analytics";
 
 type FrameType = "none" | "phone" | "desktop";
 interface ProjectImage { url: string; frame: FrameType; }
+interface CaseStudyData {
+  headline: string; challenge: string; solution: string;
+  results: string[]; techStack: string[]; duration: string; role: string;
+}
 interface Project {
   id: string; title: string; desc: string; link: string;
   tags: string[]; images: (string | ProjectImage)[]; image?: string;
+  slug?: string; caseStudy?: CaseStudyData;
 }
 
 const FALLBACK: Project[] = [
@@ -141,6 +146,14 @@ export default function PortfolioSection({ getCldUrl }: { getCldUrl: (n: string)
                       <span key={tag} className="text-[10px] border border-border px-2 py-1 uppercase tracking-widest font-bold text-muted">{tag}</span>
                     ))}
                   </div>
+                  {project.caseStudy && (
+                    <a
+                      href={`/projeto/${project.slug || project.title.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}`}
+                      className="w-full flex items-center justify-center gap-2 border border-accent text-accent py-2 text-[10px] font-bold uppercase tracking-widest hover:bg-accent hover:text-white transition-all"
+                    >
+                      Ver Case Study
+                    </a>
+                  )}
                 </div>
               </motion.div>
             );

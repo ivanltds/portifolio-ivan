@@ -3,6 +3,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
+import CaseStudy from "./pages/CaseStudy.tsx";
 import AdminLogin from "./pages/AdminLogin.tsx";
 import AdminDashboard from "./pages/AdminDashboard.tsx";
 import { restoreConsent } from "./components/CookieBanner";
@@ -20,8 +21,11 @@ Sentry.init({
 restoreConsent();
 
 function Root() {
-  const isAdmin = window.location.pathname.startsWith("/admin");
+  const path = window.location.pathname;
+  const isAdmin = path.startsWith("/admin");
+  const isCaseStudy = path.startsWith("/projeto/");
 
+  if (isCaseStudy) return <CaseStudy />;
   if (!isAdmin) return <App />;
 
   const token = localStorage.getItem("admin_token");
