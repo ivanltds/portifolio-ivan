@@ -349,83 +349,61 @@ export default function AdminDashboard({ onLogout }: Props) {
               </div>
 
               {/* ── Slug ── */}
-              <div className="px-8 space-y-2 border-t border-border pt-6">
+              <div className="space-y-2 border-t border-border pt-6">
                 <label className="text-[10px] uppercase tracking-widest font-bold text-muted block">Slug (URL do case study)</label>
                 <input
-                  type="text" value={form.slug || ""}
-                  onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
-                  placeholder="ex: invite-event-saas (vazio = gerado do título)"
+                  type="text"
+                  value={form.slug || ""}
+                  onChange={(e) => { const v = e.target.value; setForm((f) => ({ ...f, slug: v })); }}
+                  placeholder="invite-event-saas (vazio = gerado do título)"
                   className="w-full bg-transparent border-b border-border py-3 focus:border-accent focus:outline-none text-sm font-light transition-colors"
                 />
               </div>
 
               {/* ── Case Study ── */}
-              <div className="px-8 space-y-4 border-t border-border pt-6">
+              <div className="space-y-4 border-t border-border pt-6">
                 <div className="flex items-center justify-between">
                   <label className="text-[10px] uppercase tracking-widest font-bold text-muted">Case Study</label>
                   <button
                     type="button"
-                    onClick={() => setForm((f) => ({
-                      ...f,
-                      caseStudy: f.caseStudy ? undefined : { headline: "", challenge: "", solution: "", results: [], techStack: [], duration: "", role: "" }
-                    }))}
-                    className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1 border transition-all ${form.caseStudy ? "border-accent text-accent" : "border-border text-muted hover:border-accent hover:text-accent"}`}
+                    onClick={() => setForm((f) => ({ ...f, caseStudy: f.caseStudy ? undefined : { headline: "", challenge: "", solution: "", results: [], techStack: [], duration: "", role: "" } }))}
+                    className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1 border transition-all ${form.caseStudy ? "border-accent text-accent" : "border-border text-muted hover:border-accent"}`}
                   >
                     {form.caseStudy ? "✓ Ativado" : "Ativar"}
                   </button>
                 </div>
                 {form.caseStudy && (
                   <div className="space-y-4 pl-4 border-l border-accent/30">
-                    {([
-                      { label: "Headline (frase de impacto)", field: "headline", placeholder: "De 0 a 10k usuários em 3 meses" },
-                      { label: "Duração", field: "duration", placeholder: "3 meses" },
-                      { label: "Papel / Role", field: "role", placeholder: "Tech Lead + Dev" },
-                    ] as const).map(({ label, field, placeholder }) => (
-                      <div key={field} className="space-y-1">
-                        <label className="text-[10px] uppercase tracking-widest font-bold text-muted block">{label}</label>
-                        <input
-                          type="text"
-                          value={form.caseStudy?.[field] || ""}
-                          onChange={(e) => setForm((f) => ({ ...f, caseStudy: { ...f.caseStudy!, [field]: e.target.value } }))}
-                          placeholder={placeholder}
-                          className="w-full bg-transparent border-b border-border py-2 focus:border-accent focus:outline-none text-sm font-light transition-colors"
-                        />
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase tracking-widest font-bold text-muted block">Headline (frase de impacto)</label>
+                      <input type="text" value={form.caseStudy.headline} onChange={(e) => { const v = e.target.value; setForm((f) => ({ ...f, caseStudy: { ...f.caseStudy!, headline: v } })); }} placeholder="De 0 a 10k usuários em 3 meses" className="w-full bg-transparent border-b border-border py-2 focus:border-accent focus:outline-none text-sm font-light transition-colors" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-[10px] uppercase tracking-widest font-bold text-muted block">Duração</label>
+                        <input type="text" value={form.caseStudy.duration} onChange={(e) => { const v = e.target.value; setForm((f) => ({ ...f, caseStudy: { ...f.caseStudy!, duration: v } })); }} placeholder="3 meses" className="w-full bg-transparent border-b border-border py-2 focus:border-accent focus:outline-none text-sm font-light transition-colors" />
                       </div>
-                    ))}
-                    {([
-                      { label: "O Desafio", field: "challenge", placeholder: "Qual era o problema principal..." },
-                      { label: "A Solução", field: "solution", placeholder: "Como foi abordado e resolvido..." },
-                    ] as const).map(({ label, field, placeholder }) => (
-                      <div key={field} className="space-y-1">
-                        <label className="text-[10px] uppercase tracking-widest font-bold text-muted block">{label}</label>
-                        <textarea
-                          rows={4}
-                          value={form.caseStudy?.[field] || ""}
-                          onChange={(e) => setForm((f) => ({ ...f, caseStudy: { ...f.caseStudy!, [field]: e.target.value } }))}
-                          placeholder={placeholder}
-                          className="w-full bg-transparent border border-border p-3 focus:border-accent focus:outline-none text-sm font-light resize-none transition-colors"
-                        />
+                      <div className="space-y-1">
+                        <label className="text-[10px] uppercase tracking-widest font-bold text-muted block">Role</label>
+                        <input type="text" value={form.caseStudy.role} onChange={(e) => { const v = e.target.value; setForm((f) => ({ ...f, caseStudy: { ...f.caseStudy!, role: v } })); }} placeholder="Tech Lead + Dev" className="w-full bg-transparent border-b border-border py-2 focus:border-accent focus:outline-none text-sm font-light transition-colors" />
                       </div>
-                    ))}
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase tracking-widest font-bold text-muted block">O Desafio</label>
+                      <textarea rows={3} value={form.caseStudy.challenge} onChange={(e) => { const v = e.target.value; setForm((f) => ({ ...f, caseStudy: { ...f.caseStudy!, challenge: v } })); }} placeholder="Qual era o problema principal..." className="w-full bg-transparent border border-border p-3 focus:border-accent focus:outline-none text-sm font-light resize-none transition-colors" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase tracking-widest font-bold text-muted block">A Solução</label>
+                      <textarea rows={3} value={form.caseStudy.solution} onChange={(e) => { const v = e.target.value; setForm((f) => ({ ...f, caseStudy: { ...f.caseStudy!, solution: v } })); }} placeholder="Como foi abordado e resolvido..." className="w-full bg-transparent border border-border p-3 focus:border-accent focus:outline-none text-sm font-light resize-none transition-colors" />
+                    </div>
                     <div className="space-y-1">
                       <label className="text-[10px] uppercase tracking-widest font-bold text-muted block">Resultados (um por linha)</label>
-                      <textarea
-                        rows={4}
-                        value={form.caseStudy.results?.join("\n") || ""}
-                        onChange={(e) => setForm((f) => ({ ...f, caseStudy: { ...f.caseStudy!, results: e.target.value.split("\n").filter(Boolean) } }))}
-                        placeholder={"Redução de 40% no tempo de entrega\nAumento de 3x na capacidade do time"}
-                        className="w-full bg-transparent border border-border p-3 focus:border-accent focus:outline-none text-sm font-light resize-none transition-colors"
-                      />
+                      <textarea rows={4} value={form.caseStudy.results.join("\n")} onChange={(e) => { const v = e.target.value; setForm((f) => ({ ...f, caseStudy: { ...f.caseStudy!, results: v.split("\n") } })); }} placeholder={"Redução de 40% no tempo de entrega\nAumento de 3x na capacidade do time"} className="w-full bg-transparent border border-border p-3 focus:border-accent focus:outline-none text-sm font-light resize-none transition-colors" />
+                      <p className="text-[10px] text-muted">Uma linha por resultado. Linhas em branco são ignoradas ao salvar.</p>
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] uppercase tracking-widest font-bold text-muted block">Tech Stack (separado por vírgula)</label>
-                      <input
-                        type="text"
-                        value={form.caseStudy.techStack?.join(", ") || ""}
-                        onChange={(e) => setForm((f) => ({ ...f, caseStudy: { ...f.caseStudy!, techStack: e.target.value.split(",").map((t) => t.trim()).filter(Boolean) } }))}
-                        placeholder="React, Node.js, Redis"
-                        className="w-full bg-transparent border-b border-border py-2 focus:border-accent focus:outline-none text-sm font-light transition-colors"
-                      />
+                      <input type="text" value={form.caseStudy.techStack.join(", ")} onChange={(e) => { const v = e.target.value; setForm((f) => ({ ...f, caseStudy: { ...f.caseStudy!, techStack: v.split(",").map((t) => t.trim()).filter(Boolean) } })); }} placeholder="React, Node.js, Redis" className="w-full bg-transparent border-b border-border py-2 focus:border-accent focus:outline-none text-sm font-light transition-colors" />
                     </div>
                   </div>
                 )}
